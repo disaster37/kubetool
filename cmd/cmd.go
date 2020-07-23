@@ -9,11 +9,6 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// Cmd permit to call function on kubernetes
-type Cmd struct {
-	client *kubetool.Kubetool
-}
-
 // Permit to get connexion on kubernetes
 func newCmd(c *cli.Context) (cmd *kubetool.Kubetool, err error) {
 

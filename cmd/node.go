@@ -1,10 +1,12 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
 
+	"github.com/disaster37/kubetools/v1.18/kubetool"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
@@ -14,7 +16,7 @@ func GetMasterNodes(c *cli.Context) error {
 
 	cmd, err := newCmd(c)
 	if err != nil {
-		log.Error("Can't connect on kubernetes: %s", err.Error)
+		log.Errorf("Can't connect on kubernetes: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -38,7 +40,7 @@ func GetWorkerNodes(c *cli.Context) error {
 
 	cmd, err := newCmd(c)
 	if err != nil {
-		log.Error("Can't connect on kubernetes: %s", err.Error)
+		log.Errorf("Can't connect on kubernetes: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -47,12 +49,16 @@ func GetWorkerNodes(c *cli.Context) error {
 		defer cancelFunc()
 	}
 
-	nodes, err := cmd.WorkerNodes(ctx)
+	workers, err := getWorkerNodes(ctx, cmd)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("%s\n", strings.Join(nodes, ";"))
+	fmt.Printf("%s\n", strings.Join(workers, ";"))
 
 	return nil
+}
+
+func getWorkerNodes(ctx context.Context, cmd *kubetool.Kubetool) (workers []string, err error) {
+	return cmd.WorkerNodes(ctx)
 }

@@ -18,7 +18,7 @@ func InitPatchManagement(c *cli.Context) error {
 
 	cmd, err := newCmd(c)
 	if err != nil {
-		log.Error("Can't connect on kubernetes: %s", err.Error)
+		log.Errorf("Can't connect on kubernetes: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -32,7 +32,7 @@ func InitPatchManagement(c *cli.Context) error {
 	// check the node status
 	isOk, err := cmd.NodeOk(ctx, nodeName)
 	if err != nil {
-		log.Error("Error when check the node state for %s: %s", nodeName, err.Error())
+		log.Errorf("Error when check the node state for %s: %s", nodeName, err.Error())
 		os.Exit(1)
 	}
 	if !isOk {
@@ -102,7 +102,7 @@ func InitPatchManagement(c *cli.Context) error {
 func FinalizePatchManagement(c *cli.Context) error {
 	cmd, err := newCmd(c)
 	if err != nil {
-		log.Error("Can't connect on kubernetes: %s", err.Error())
+		log.Errorf("Can't connect on kubernetes: %s", err.Error())
 		os.Exit(2)
 	}
 
@@ -190,6 +190,6 @@ func uncordonNodeForRecue(cmd *kubetool.Kubetool, nodeName string) {
 		os.Exit(2)
 	}
 
-	log.Warningf("Node %s successfully uncordonned in rescue step")
+	log.Warningf("Node %s successfully uncordonned in rescue step", nodeName)
 	os.Exit(1)
 }
