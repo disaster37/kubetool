@@ -25,7 +25,7 @@ func GetMasterNodes(c *cli.Context) error {
 		defer cancelFunc()
 	}
 
-	nodes, err := cmd.MasterNodes(ctx)
+	nodes, err := getMasterNodes(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -61,4 +61,8 @@ func GetWorkerNodes(c *cli.Context) error {
 
 func getWorkerNodes(ctx context.Context, cmd *kubetool.Kubetool) (workers []string, err error) {
 	return cmd.WorkerNodes(ctx)
+}
+
+func getMasterNodes(ctx context.Context, cmd *kubetool.Kubetool) (workers []string, err error) {
+	return cmd.MasterNodes(ctx)
 }

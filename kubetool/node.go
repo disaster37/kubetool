@@ -72,6 +72,7 @@ func (k *Kubetool) Drain(ctx context.Context, nodeName string, timeout time.Dura
 		GracePeriodSeconds:  -1,
 		Out:                 os.Stdout,
 		ErrOut:              os.Stderr,
+		Force:               true,
 	}
 
 	err = drain.RunNodeDrain(drainer, node.Name)

@@ -36,5 +36,33 @@ func (s *TestSuite) TestGetWorkerNodes() {
 	nodes, err := getWorkerNodes(context.TODO(), cmd)
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), "worker1", nodes[0])
+}
+
+func (s *TestSuite) TestGetMasterNodes() {
+
+	fakeClient := fake.NewSimpleClientset(
+		&v1.Node{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "master1",
+				Labels: map[string]string{
+					"master": "true",
+				},
+			},
+		},
+		&v1.Node{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "worker1",
+				Labels: map[string]string{
+					"worker": "true",
+				},
+			},
+		},
+	)
+
+	cmd := kubetool.NewConnexionFromClient(fakeClient)
+
+	nodes, err := getMasterNodes(context.TODO(), cmd)
+	assert.NoError(s.T(), err)
+	assert.Equal(s.T(), "master1", nodes[0])
 
 }
