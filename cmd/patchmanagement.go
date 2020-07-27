@@ -10,11 +10,12 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// InitPatchManagement permit to lauch all step before start patch management on node
+// SetDowntime permit to put node on downtime
+// It will look all pod running on node. For each, it try to retrieve some pre-job to execuste from configmap patchmanagement.
 // Exit 0: all work fine
 // Exit 1: Somethink wrong, we need to skip node
 // Exit 2: Somethink wrong, we need to stop patchmanagement because of node is broken
-func InitPatchManagement(c *cli.Context) error {
+func SetDowntime(c *cli.Context) error {
 
 	cmd, err := newCmd(c)
 	if err != nil {
@@ -29,7 +30,7 @@ func InitPatchManagement(c *cli.Context) error {
 
 	nodeName := c.String("node-name")
 
-	err = initPatchManagement(ctx, cmd, nodeName)
+	err = setDowntime(ctx, cmd, nodeName)
 	if err != nil {
 
 		err = uncordonNodeForRecue(cmd, nodeName)
@@ -41,15 +42,14 @@ func InitPatchManagement(c *cli.Context) error {
 
 		// Rescue success
 		os.Exit(1)
-
 	}
 
 	return nil
 
 }
 
-// FinalizePatchManagement permit to finalize the patch management
-func FinalizePatchManagement(c *cli.Context) error {
+// UnsetDowntime permit to lauch some step after enable node
+func UnsetDowntime(c *cli.Context) error {
 	cmd, err := newCmd(c)
 	if err != nil {
 		log.Errorf("Can't connect on kubernetes: %s", err.Error())
@@ -63,9 +63,17 @@ func FinalizePatchManagement(c *cli.Context) error {
 
 	nodeName := c.String("node-name")
 
-	returnCode, err := finalizePatchManagement(ctx, cmd, nodeName)
-	if returnCode != 0 {
-		os.Exit(returnCode)
+	err = unsetDowntime(ctx, cmd, nodeName)
+	if err != nil {
+		err = uncordonNodeForRecue(cmd, nodeName)
+		if err != nil {
+			// Rescue failed
+			log.Error(err.Error())
+			os.Exit(2)
+		}
+
+		// Rescue success
+		os.Exit(1)
 	}
 
 	return nil
@@ -83,7 +91,7 @@ func uncordonNodeForRecue(cmd *kubetool.Kubetool, nodeName string) (err error) {
 	return nil
 }
 
-func initPatchManagement(ctx context.Context, cmd *kubetool.Kubetool, nodeName string) (err error) {
+func setDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string) (err error) {
 	// check the node status
 	isOk, err := cmd.NodeOk(ctx, nodeName)
 	if err != nil {
@@ -147,17 +155,17 @@ func initPatchManagement(ctx context.Context, cmd *kubetool.Kubetool, nodeName s
 	return nil
 }
 
-func finalizePatchManagement(ctx context.Context, cmd *kubetool.Kubetool, nodeName string) (returnCode int, err error) {
+func unsetDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string) (err error) {
 
 	// wait node to be ready
 	for {
 		isOk, err := cmd.NodeOk(ctx, nodeName)
 		if err != nil {
 			log.Errorf("Error when get state of node %s: %s", nodeName, err.Error())
-			return 2, err
+			return err
 		}
 		if !isOk {
-			log.Errorf("Node %s is not on ready state, we wait ...", nodeName)
+			log.Infof("Node %s is not on ready state, we wait ...", nodeName)
 			time.Sleep(10 * time.Second)
 		} else {
 			log.Debugf("Node %s is ready", nodeName)
@@ -169,28 +177,28 @@ func finalizePatchManagement(ctx context.Context, cmd *kubetool.Kubetool, nodeNa
 	err = cmd.Uncordon(ctx, nodeName)
 	if err != nil {
 		log.Errorf("Error when uncordon node %s: %s", nodeName, err.Error())
-		return 2, err
+		return err
 	}
 
 	// Sleep and wait pods
-	time.Sleep(60 * time.Second)
+	time.Sleep(30 * time.Second)
 	err = cmd.WaitPodsOnNode(ctx, nodeName)
 	if err != nil {
 		log.Errorf("Error when wait pods to be started on node %s: %s", nodeName, err.Error())
-		return 2, err
+		return err
 	}
 
 	// List all namespace and lauch post-job if needed
 	namespaces, err := cmd.NamespacesPodsOnNode(ctx, nodeName)
 	if err != nil {
 		log.Errorf("Error when get all namespace for node %s: %s", nodeName, err.Error())
-		return 1, err
+		return err
 	}
 	for _, namespace := range namespaces {
 		postScript, err := cmd.PostJobPatchManagement(ctx, namespace)
 		if err != nil {
 			log.Errorf("Error when try to get post-job script on %s: %s", namespace, err.Error())
-			return 1, err
+			return err
 		}
 		if postScript != "" {
 			log.Infof("Post script found on %s, running it...", namespace)
@@ -199,19 +207,19 @@ func finalizePatchManagement(ctx context.Context, cmd *kubetool.Kubetool, nodeNa
 			secrets, err := cmd.Secrets(ctx, namespace)
 			if err != nil {
 				log.Errorf("Error when try to get list of secrets to inject in job on %s: %s", namespace, err.Error())
-				return 1, err
+				return err
 			}
 
 			// Run job
 			err = cmd.RunJob(ctx, namespace, "post-job", postScript, secrets)
 			if err != nil {
 				log.Errorf("Error when run post-job for %s: %s", namespace, err.Error())
-				return 1, err
+				return err
 			}
 
 			log.Infof("Run post-job successfully for %s", namespace)
 		}
 	}
 
-	return 0, nil
+	return nil
 }
