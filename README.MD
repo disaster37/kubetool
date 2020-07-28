@@ -31,6 +31,7 @@ make test
 ### Global options
 
 The following parameters are available for all commands line :
+
 - **--kubeconfig**: The kube config file to use. You can also use environment variable `KUBECONFIG`. Default to `$HOME/.kube/config`.
 - **--debug**: Enable the debug mode
 - **--help**: Display help for the current command
@@ -50,7 +51,7 @@ It return the list of worker nodes separated by coma.
 
 Sample of command:
 
-``bash
+```bash
 kubetool --kubeconfig "C:\Users\user\.kube\config" list-worker-nodes
 ```
 
