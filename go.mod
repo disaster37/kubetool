@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
-	github.com/googleapis/gnostic v0.5.1 // indirect
+	github.com/googleapis/gnostic v0.4.0 // indirect
 	github.com/imdario/mergo v0.3.10 // indirect
 	github.com/mattn/go-colorable v0.1.7 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
