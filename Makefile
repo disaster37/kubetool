@@ -13,4 +13,4 @@ ifeq ($(OS),Windows_NT)
 else
 	name := kubetools
 endif
-	go build -o $(name)
+	go build -o ${name}
