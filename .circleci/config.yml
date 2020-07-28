@@ -11,7 +11,7 @@ jobs:
       - image: circleci/golang:1.14
         environment:
           GO111MODULE: "on"
-    working_directory: /go/kubetools
+    working_directory: /go/kubetool
     steps:
       - checkout
       - run: make test
@@ -23,7 +23,7 @@ jobs:
       - image: circleci/golang:1.14
         environment:
           GO111MODULE: "on"
-    working_directory: /go/kubetools
+    working_directory: /go/kubetool
     steps:
       - checkout
       - run: make build
@@ -36,14 +36,14 @@ jobs:
           CIRCLE_PROJECT_REPONAME: $CIRCLE_PROJECT_REPONAME
           CIRCLE_TAG: $CIRCLE_TAG
           GO111MODULE: "on"
-    working_directory: /go/kubetools
+    working_directory: /go/kubetool
     steps:
       - checkout
       - run: go get github.com/mitchellh/gox
       - run: go get github.com/tcnksm/ghr
       - run: sed -i 's/app.Version := "develop"/app.Version := "$CIRCLE_TAG"/' main.go
-      - run: gox -os="freebsd darwin linux windows" -arch "386 amd64" -parallel=1  -output "dist/kubetools_${CIRCLE_TAG}_{{.OS}}_{{.Arch}}"
-      - run: CGO_ENABLED=0 gox -os="freebsd darwin linux windows" -arch "386 amd64" -parallel=1 -output "dist/kubetools_${CIRCLE_TAG}_{{.OS}}_{{.Arch}}_static"
+      - run: gox -os="freebsd darwin linux windows" -arch "386 amd64" -parallel=1  -output "dist/kubetool_${CIRCLE_TAG}_{{.OS}}_{{.Arch}}"
+      - run: CGO_ENABLED=0 gox -os="freebsd darwin linux windows" -arch "386 amd64" -parallel=1 -output "dist/kubetool_${CIRCLE_TAG}_{{.OS}}_{{.Arch}}_static"
       - run: ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME $CIRCLE_TAG dist/
 workflows:
   version: 2

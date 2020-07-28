@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/disaster37/kubetools/v1.18/kubetool"
+	"github.com/disaster37/kubetool/v1.18/kubetool"
 	"github.com/stretchr/testify/assert"
 	batch "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"

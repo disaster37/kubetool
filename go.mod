@@ -1,4 +1,4 @@
-module github.com/disaster37/kubetools/v1.18
+module github.com/disaster37/kubetool/v1.18
 
 go 1.14
 
