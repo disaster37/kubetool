@@ -1,6 +1,6 @@
 [![CircleCI](https://circleci.com/gh/disaster37/kubetool/tree/v1.18.svg?style=svg)](https://circleci.com/gh/disaster37/kubetool/tree/v.1.18)
 [![Go Report Card](https://goreportcard.com/badge/github.com/disaster37/kubetool)](https://goreportcard.com/report/github.com/disaster37/kubetool)
-[![GoDoc](https://godoc.org/github.com/disaster37/kubetool.svg)](http://godoc.org/github.com/disaster37/kubetools)
+[![GoDoc](https://godoc.org/github.com/disaster37/kubetool.svg)](http://godoc.org/github.com/disaster37/kubetool)
 [![codecov](https://codecov.io/gh/disaster37/kubetool/branch/v1.18/graph/badge.svg)](https://codecov.io/gh/disaster37/kubetool/branch/v1.18)
 
 # Kubetool
