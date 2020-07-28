@@ -9,8 +9,8 @@ test: fmt
 
 build: fmt
 ifeq ($(OS),Windows_NT)
-	NAME =  kubetool.exe
+	go build -o  kubetool.exe
 else
-	NAME = kubetool
+	go build -o kubetool
 endif
-	go build -o $(NAME)
+	
