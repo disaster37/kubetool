@@ -56,7 +56,7 @@ func run(args []string) error {
 					Usage: "The node name",
 				},
 			},
-			Action: cmd.InitPatchManagement,
+			Action: cmd.SetDowntime,
 		},
 		{
 			Name:     "post-patchmanagement",
@@ -68,7 +68,7 @@ func run(args []string) error {
 					Usage: "The node name",
 				},
 			},
-			Action: cmd.FinalizePatchManagement,
+			Action: cmd.UnsetDowntime,
 		},
 		{
 			Name:     "list-master-nodes",

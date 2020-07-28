@@ -28,3 +28,9 @@ func NewConnexion(configPath string) (cmd *Kubetool, err error) {
 
 	return cmd, err
 }
+
+func NewConnexionFromClient(client kubernetes.Interface) (cmd *Kubetool) {
+	return &Kubetool{
+		client: client,
+	}
+}
