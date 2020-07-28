@@ -61,7 +61,7 @@ func (s *TestSuite) TestSetDowntimeWhenCordonFailed() {
 			},
 			Status: v1.NodeStatus{
 				Conditions: []v1.NodeCondition{
-					v1.NodeCondition{
+					{
 						Type:   v1.NodeReady,
 						Status: v1.ConditionTrue,
 					},
@@ -104,7 +104,7 @@ func (s *TestSuite) TestSetDowntimeWhenNoPodsAndDrainSuccess() {
 			},
 			Status: v1.NodeStatus{
 				Conditions: []v1.NodeCondition{
-					v1.NodeCondition{
+					{
 						Type:   v1.NodeReady,
 						Status: v1.ConditionTrue,
 					},
@@ -124,7 +124,7 @@ func (s *TestSuite) TestSetDowntimeWhenNoPodsAndDrainSuccess() {
 			},
 			Status: v1.NodeStatus{
 				Conditions: []v1.NodeCondition{
-					v1.NodeCondition{
+					{
 						Type:   v1.NodeReady,
 						Status: v1.ConditionTrue,
 					},
@@ -176,7 +176,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainSuccess() {
 			},
 			Status: v1.NodeStatus{
 				Conditions: []v1.NodeCondition{
-					v1.NodeCondition{
+					{
 						Type:   v1.NodeReady,
 						Status: v1.ConditionTrue,
 					},
@@ -196,7 +196,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainSuccess() {
 			},
 			Status: v1.NodeStatus{
 				Conditions: []v1.NodeCondition{
-					v1.NodeCondition{
+					{
 						Type:   v1.NodeReady,
 						Status: v1.ConditionTrue,
 					},
@@ -212,7 +212,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainSuccess() {
 	fakeClient.Fake.AddReactor("list", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		pods := &v1.PodList{
 			Items: []v1.Pod{
-				v1.Pod{
+				{
 					Spec: v1.PodSpec{
 						NodeName: "fake-node",
 					},
@@ -221,7 +221,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainSuccess() {
 						Namespace: "fake-namespace",
 					},
 				},
-				v1.Pod{
+				{
 					Spec: v1.PodSpec{
 						NodeName: "fake-node2",
 					},
@@ -283,7 +283,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainFailed() {
 			},
 			Status: v1.NodeStatus{
 				Conditions: []v1.NodeCondition{
-					v1.NodeCondition{
+					{
 						Type:   v1.NodeReady,
 						Status: v1.ConditionTrue,
 					},
@@ -303,7 +303,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainFailed() {
 			},
 			Status: v1.NodeStatus{
 				Conditions: []v1.NodeCondition{
-					v1.NodeCondition{
+					{
 						Type:   v1.NodeReady,
 						Status: v1.ConditionTrue,
 					},
@@ -319,7 +319,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainFailed() {
 	fakeClient.Fake.AddReactor("list", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		pods := &v1.PodList{
 			Items: []v1.Pod{
-				v1.Pod{
+				{
 					Spec: v1.PodSpec{
 						NodeName: "fake-node",
 					},
@@ -328,7 +328,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainFailed() {
 						Namespace: "fake-namespace",
 					},
 				},
-				v1.Pod{
+				{
 					Spec: v1.PodSpec{
 						NodeName: "fake-node2",
 					},
@@ -391,7 +391,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndPrejobWitSecretAndDrainSuccess() {
 			},
 			Status: v1.NodeStatus{
 				Conditions: []v1.NodeCondition{
-					v1.NodeCondition{
+					{
 						Type:   v1.NodeReady,
 						Status: v1.ConditionTrue,
 					},
@@ -411,7 +411,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndPrejobWitSecretAndDrainSuccess() {
 			},
 			Status: v1.NodeStatus{
 				Conditions: []v1.NodeCondition{
-					v1.NodeCondition{
+					{
 						Type:   v1.NodeReady,
 						Status: v1.ConditionTrue,
 					},
@@ -427,7 +427,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndPrejobWitSecretAndDrainSuccess() {
 	fakeClient.Fake.AddReactor("list", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		pods := &v1.PodList{
 			Items: []v1.Pod{
-				v1.Pod{
+				{
 					Spec: v1.PodSpec{
 						NodeName: "fake-node",
 					},
@@ -486,7 +486,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndPrejobWitSecretAndDrainSuccess() {
 				},
 				Status: batch.JobStatus{
 					Conditions: []batch.JobCondition{
-						batch.JobCondition{
+						{
 							Type:   batch.JobComplete,
 							Status: v1.ConditionTrue,
 						},
@@ -531,7 +531,7 @@ func (s *TestSuite) TestUnsetDowntimeWhenUncordonFailed() {
 			},
 			Status: v1.NodeStatus{
 				Conditions: []v1.NodeCondition{
-					v1.NodeCondition{
+					{
 						Type:   v1.NodeReady,
 						Status: v1.ConditionTrue,
 					},
@@ -573,7 +573,7 @@ func (s *TestSuite) TestUnsetDowntimeWhenNoPodsAndUncordonSuccess() {
 			},
 			Status: v1.NodeStatus{
 				Conditions: []v1.NodeCondition{
-					v1.NodeCondition{
+					{
 						Type:   v1.NodeReady,
 						Status: v1.ConditionTrue,
 					},
@@ -593,7 +593,7 @@ func (s *TestSuite) TestUnsetDowntimeWhenNoPodsAndUncordonSuccess() {
 			},
 			Status: v1.NodeStatus{
 				Conditions: []v1.NodeCondition{
-					v1.NodeCondition{
+					{
 						Type:   v1.NodeReady,
 						Status: v1.ConditionTrue,
 					},
@@ -645,7 +645,7 @@ func (s *TestSuite) TestUnsetDowntimeWhenPodsAndUncordonSuccess() {
 			},
 			Status: v1.NodeStatus{
 				Conditions: []v1.NodeCondition{
-					v1.NodeCondition{
+					{
 						Type:   v1.NodeReady,
 						Status: v1.ConditionTrue,
 					},
@@ -665,7 +665,7 @@ func (s *TestSuite) TestUnsetDowntimeWhenPodsAndUncordonSuccess() {
 			},
 			Status: v1.NodeStatus{
 				Conditions: []v1.NodeCondition{
-					v1.NodeCondition{
+					{
 						Type:   v1.NodeReady,
 						Status: v1.ConditionTrue,
 					},
@@ -681,7 +681,7 @@ func (s *TestSuite) TestUnsetDowntimeWhenPodsAndUncordonSuccess() {
 	fakeClient.Fake.AddReactor("list", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		pods := &v1.PodList{
 			Items: []v1.Pod{
-				v1.Pod{
+				{
 					Spec: v1.PodSpec{
 						NodeName: "fake-node",
 					},
@@ -690,7 +690,7 @@ func (s *TestSuite) TestUnsetDowntimeWhenPodsAndUncordonSuccess() {
 						Namespace: "fake-namespace",
 					},
 				},
-				v1.Pod{
+				{
 					Spec: v1.PodSpec{
 						NodeName: "fake-node2",
 					},
@@ -747,7 +747,7 @@ func (s *TestSuite) TestUnsetDowntimeWhenPodsAndPostjobWitSecretAndUncordonSucce
 			},
 			Status: v1.NodeStatus{
 				Conditions: []v1.NodeCondition{
-					v1.NodeCondition{
+					{
 						Type:   v1.NodeReady,
 						Status: v1.ConditionTrue,
 					},
@@ -767,7 +767,7 @@ func (s *TestSuite) TestUnsetDowntimeWhenPodsAndPostjobWitSecretAndUncordonSucce
 			},
 			Status: v1.NodeStatus{
 				Conditions: []v1.NodeCondition{
-					v1.NodeCondition{
+					{
 						Type:   v1.NodeReady,
 						Status: v1.ConditionTrue,
 					},
@@ -783,7 +783,7 @@ func (s *TestSuite) TestUnsetDowntimeWhenPodsAndPostjobWitSecretAndUncordonSucce
 	fakeClient.Fake.AddReactor("list", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		pods := &v1.PodList{
 			Items: []v1.Pod{
-				v1.Pod{
+				{
 					Spec: v1.PodSpec{
 						NodeName: "fake-node",
 					},
@@ -837,7 +837,7 @@ func (s *TestSuite) TestUnsetDowntimeWhenPodsAndPostjobWitSecretAndUncordonSucce
 				},
 				Status: batch.JobStatus{
 					Conditions: []batch.JobCondition{
-						batch.JobCondition{
+						{
 							Type:   batch.JobComplete,
 							Status: v1.ConditionTrue,
 						},
@@ -886,7 +886,7 @@ func (s *TestSuite) TestUncordonNodeForRecueWhenSuccess() {
 			},
 			Status: v1.NodeStatus{
 				Conditions: []v1.NodeCondition{
-					v1.NodeCondition{
+					{
 						Type:   v1.NodeReady,
 						Status: v1.ConditionTrue,
 					},
@@ -907,7 +907,7 @@ func (s *TestSuite) TestUncordonNodeForRecueWhenSuccess() {
 			},
 			Status: v1.NodeStatus{
 				Conditions: []v1.NodeCondition{
-					v1.NodeCondition{
+					{
 						Type:   v1.NodeReady,
 						Status: v1.ConditionTrue,
 					},
@@ -943,7 +943,7 @@ func (s *TestSuite) TestUncordonNodeForRecueWhenFailed() {
 			},
 			Status: v1.NodeStatus{
 				Conditions: []v1.NodeCondition{
-					v1.NodeCondition{
+					{
 						Type:   v1.NodeReady,
 						Status: v1.ConditionTrue,
 					},

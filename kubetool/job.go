@@ -84,7 +84,7 @@ func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string,
 				Spec: core.PodSpec{
 					RestartPolicy: "Never",
 					Containers: []core.Container{
-						core.Container{
+						{
 							Name:  jobName,
 							Image: "centos:7",
 							Command: []string{
