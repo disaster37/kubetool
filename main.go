@@ -4,7 +4,7 @@ import (
 	"os"
 	"sort"
 
-	"github.com/disaster37/kubetools/v1.18/cmd"
+	"github.com/disaster37/kubetool/v1.18/cmd"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"github.com/urfave/cli/v2/altsrc"
@@ -47,8 +47,8 @@ func run(args []string) error {
 	}
 	app.Commands = []*cli.Command{
 		{
-			Name:     "pre-patchmanagement",
-			Usage:    "Run pre patchmanagement action on node",
+			Name:     "set-downtime",
+			Usage:    "Run pre action on node and set it on downtime",
 			Category: "Patchmanagement",
 			Flags: []cli.Flag{
 				&cli.StringFlag{
@@ -59,8 +59,8 @@ func run(args []string) error {
 			Action: cmd.SetDowntime,
 		},
 		{
-			Name:     "post-patchmanagement",
-			Usage:    "Run post patchmanagement action on nodes",
+			Name:     "unset-downtime",
+			Usage:    "Unset downtime and run post action on node",
 			Category: "Patchmanagemeent",
 			Flags: []cli.Flag{
 				&cli.StringFlag{

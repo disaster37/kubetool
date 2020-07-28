@@ -5,12 +5,12 @@ fmt:
 	gofmt -s -w ./
 
 test: fmt
-	go test ./... -v -count 1 -parallel 1 -race -coverprofile=coverage.txt -covermode=atomic $(TESTARGS) -timeout 60s
+	go test ./... -v -count 1 -parallel 1 -race -coverprofile=coverage.txt -covermode=atomic $(TESTARGS) -timeout 600s
 
 build: fmt
 ifeq ($(OS),Windows_NT)
-	name :=  kubetools.exe
+	go build -o  kubetool.exe
 else
-	name := kubetools
+	go build -o kubetool
 endif
-	go build -o $(name)
+	
