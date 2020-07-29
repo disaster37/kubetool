@@ -32,6 +32,7 @@ func SetDowntime(c *cli.Context) error {
 
 	err = setDowntime(ctx, cmd, nodeName)
 	if err != nil {
+		log.Error(err.Error())
 
 		err = uncordonNodeForRecue(cmd, nodeName)
 		if err != nil {
@@ -65,6 +66,7 @@ func UnsetDowntime(c *cli.Context) error {
 
 	err = unsetDowntime(ctx, cmd, nodeName)
 	if err != nil {
+		log.Error(err.Error())
 		err = uncordonNodeForRecue(cmd, nodeName)
 		if err != nil {
 			// Rescue failed
