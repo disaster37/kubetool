@@ -20,6 +20,7 @@ func (k *Kubetool) NamespacesPodsOnNode(ctx context.Context, nodeName string) (l
 
 	pods, err := k.client.CoreV1().Pods("").List(ctx, metav1.ListOptions{
 		FieldSelector: "spec.nodeName=" + nodeName,
+		LabelSelector: "patchmanagement=true",
 	})
 	if err != nil {
 		return nil, err
