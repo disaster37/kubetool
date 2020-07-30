@@ -82,6 +82,26 @@ func run(args []string) error {
 			Category: "Cluster",
 			Action:   cmd.GetWorkerNodes,
 		},
+		{
+			Name:     "list-nodes-rundeck",
+			Usage:    "List all nodes and return them as json Rundeck format",
+			Category: "Cluster",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "username",
+					Usage: "Username to connect on node with ssh",
+				},
+				&cli.StringFlag{
+					Name:  "cluster-name",
+					Usage: "The cluster name to append it on tags. Usefull to filter node on Rundeck",
+				},
+				&cli.StringFlag{
+					Name:  "ssh-key-storage-path",
+					Usage: "SSH key storage path to connect on node with ssh",
+				},
+			},
+			Action: cmd.GetNodesForRundeck,
+		},
 	}
 
 	app.Before = func(c *cli.Context) error {
