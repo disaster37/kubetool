@@ -52,7 +52,7 @@ func (k *Kubetool) WaitPodsOnNode(ctx context.Context, nodeName string) (err err
 		for _, pod := range pods.Items {
 			for _, condition := range pod.Status.Conditions {
 				if condition.Type == v1.PodReady {
-					if condition.Status != v1.ConditionTrue {
+					if condition.Status != v1.ConditionTrue && condition.Reason != "PodCompleted" {
 						log.Debugf("We wait pod %s: %s", pod.Name, condition.Reason)
 						isOk = false
 						break
