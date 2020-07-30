@@ -15,7 +15,8 @@ type RundeckNodeEntry struct {
 	Hostname          string `json:"hostname,omitempty"`
 	Username          string `json:"username,omitempty"`
 	Tags              string `json:"tags,omitempty"`
-	SshKeyStoragePath string `json:"ssh-key-storage-path,omitempty"`
+	SSHKeyStoragePath string `json:"ssh-key-storage-path,omitempty"`
+	SSHAuthentication string `json:"ssh-authentication,omitempty"`
 }
 
 // GetNodesForRundeck permit to list all nodes and return Rundeck node entry format
@@ -43,9 +44,10 @@ func GetNodesForRundeck(c *cli.Context) error {
 		result[node] = RundeckNodeEntry{
 			NodeName:          node,
 			Hostname:          node,
-			SshKeyStoragePath: c.String("ssh-key-storage-path"),
+			SSHKeyStoragePath: c.String("ssh-key-storage-path"),
 			Username:          c.String("username"),
 			Tags:              fmt.Sprintf("%s,master", c.String("cluster-name")),
+			SSHAuthentication: c.String("ssh-authentication"),
 		}
 	}
 
@@ -58,9 +60,10 @@ func GetNodesForRundeck(c *cli.Context) error {
 		result[node] = RundeckNodeEntry{
 			NodeName:          node,
 			Hostname:          node,
-			SshKeyStoragePath: c.String("ssh-key-storage-path"),
+			SSHKeyStoragePath: c.String("ssh-key-storage-path"),
 			Username:          c.String("username"),
 			Tags:              fmt.Sprintf("%s,worker", c.String("cluster-name")),
+			SSHAuthentication: c.String("ssh-authentication"),
 		}
 	}
 
