@@ -11,12 +11,13 @@ import (
 
 // RundeckNodeEntry represent node entry for Rundeck
 type RundeckNodeEntry struct {
-	NodeName          string `json:"nodename"`
-	Hostname          string `json:"hostname,omitempty"`
-	Username          string `json:"username,omitempty"`
-	Tags              string `json:"tags,omitempty"`
-	SSHKeyStoragePath string `json:"ssh-key-storage-path,omitempty"`
-	SSHAuthentication string `json:"ssh-authentication,omitempty"`
+	NodeName               string `json:"nodename"`
+	Hostname               string `json:"hostname,omitempty"`
+	Username               string `json:"username,omitempty"`
+	Tags                   string `json:"tags,omitempty"`
+	SSHKeyStoragePath      string `json:"ssh-key-storage-path,omitempty"`
+	SSHPasswordStoragePath string `json:"ssh-password-storage-path,omitempty"`
+	SSHAuthentication      string `json:"ssh-authentication,omitempty"`
 }
 
 // GetNodesForRundeck permit to list all nodes and return Rundeck node entry format
@@ -42,12 +43,13 @@ func GetNodesForRundeck(c *cli.Context) error {
 	}
 	for _, node := range nodes {
 		result[node] = RundeckNodeEntry{
-			NodeName:          node,
-			Hostname:          node,
-			SSHKeyStoragePath: c.String("ssh-key-storage-path"),
-			Username:          c.String("username"),
-			Tags:              fmt.Sprintf("%s,master", c.String("cluster-name")),
-			SSHAuthentication: c.String("ssh-authentication"),
+			NodeName:               node,
+			Hostname:               node,
+			SSHKeyStoragePath:      c.String("ssh-key-storage-path"),
+			SSHPasswordStoragePath: c.String("ssh-password-storage-path"),
+			Username:               c.String("username"),
+			Tags:                   fmt.Sprintf("%s,master", c.String("cluster-name")),
+			SSHAuthentication:      c.String("ssh-authentication"),
 		}
 	}
 
@@ -58,12 +60,13 @@ func GetNodesForRundeck(c *cli.Context) error {
 	}
 	for _, node := range nodes {
 		result[node] = RundeckNodeEntry{
-			NodeName:          node,
-			Hostname:          node,
-			SSHKeyStoragePath: c.String("ssh-key-storage-path"),
-			Username:          c.String("username"),
-			Tags:              fmt.Sprintf("%s,worker", c.String("cluster-name")),
-			SSHAuthentication: c.String("ssh-authentication"),
+			NodeName:               node,
+			Hostname:               node,
+			SSHKeyStoragePath:      c.String("ssh-key-storage-path"),
+			SSHPasswordStoragePath: c.String("ssh-password-storage-path"),
+			Username:               c.String("username"),
+			Tags:                   fmt.Sprintf("%s,worker", c.String("cluster-name")),
+			SSHAuthentication:      c.String("ssh-authentication"),
 		}
 	}
 

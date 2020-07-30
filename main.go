@@ -100,6 +100,10 @@ func run(args []string) error {
 					Usage: "SSH key storage path to connect on node with ssh",
 				},
 				&cli.StringFlag{
+					Name:  "ssh-password-storage-path",
+					Usage: "SSH password storage path to connect on node with ssh",
+				},
+				&cli.StringFlag{
 					Name:  "ssh-authentication",
 					Usage: "SSH authentication to connect on node",
 					Value: "password",
