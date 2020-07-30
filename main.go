@@ -99,6 +99,11 @@ func run(args []string) error {
 					Name:  "ssh-key-storage-path",
 					Usage: "SSH key storage path to connect on node with ssh",
 				},
+				&cli.StringFlag{
+					Name:  "ssh-authentication",
+					Usage: "SSH authentication to connect on node",
+					Value: "password",
+				},
 			},
 			Action: cmd.GetNodesForRundeck,
 		},
