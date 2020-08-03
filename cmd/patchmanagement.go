@@ -184,11 +184,6 @@ func unsetDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string)
 
 	// Sleep and wait pods
 	time.Sleep(30 * time.Second)
-	err = cmd.WaitPodsOnNode(ctx, nodeName)
-	if err != nil {
-		log.Errorf("Error when wait pods to be started on node %s: %s", nodeName, err.Error())
-		return err
-	}
 
 	// List all namespace and lauch post-job if needed
 	namespaces, err := cmd.NamespacesPodsOnNode(ctx, nodeName)
@@ -221,6 +216,12 @@ func unsetDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string)
 
 			log.Infof("Run post-job successfully for %s", namespace)
 		}
+	}
+
+	err = cmd.WaitPodsOnNode(ctx, nodeName)
+	if err != nil {
+		log.Errorf("Error when wait pods to be started on node %s: %s", nodeName, err.Error())
+		return err
 	}
 
 	return nil
