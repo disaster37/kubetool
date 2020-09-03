@@ -61,7 +61,7 @@ func run(args []string) error {
 		{
 			Name:     "unset-downtime",
 			Usage:    "Unset downtime and run post action on node",
-			Category: "Patchmanagemeent",
+			Category: "Patchmanagement",
 			Flags: []cli.Flag{
 				&cli.StringFlag{
 					Name:  "node-name",
@@ -110,6 +110,30 @@ func run(args []string) error {
 				},
 			},
 			Action: cmd.GetNodesForRundeck,
+		},
+		{
+			Name:     "run-pre-job",
+			Usage:    "Run pre job from given namespace",
+			Category: "Patchmanagement",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "namespace",
+					Usage: "Namespace where found pre job to run",
+				},
+			},
+			Action: cmd.RunPreJob,
+		},
+		{
+			Name:     "run-post-job",
+			Usage:    "Run post job from given namespace",
+			Category: "Patchmanagement",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "namespace",
+					Usage: "Namespace where found post job to run",
+				},
+			},
+			Action: cmd.RunPostJob,
 		},
 	}
 
