@@ -1,8 +1,10 @@
 package kubetool
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"github.com/pkg/errors"
@@ -114,6 +116,29 @@ func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string,
 		return err
 	}
 
+	getLogs := func(jobName string) error {
+		podList, err := k.client.CoreV1().Pods(namespace).List(ctx, meta.ListOptions{LabelSelector: "job-name=" + jobObj.Name})
+		if err != nil {
+			return err
+		}
+		for _, pod := range podList.Items {
+			req := k.client.CoreV1().Pods(namespace).GetLogs(pod.Name, &core.PodLogOptions{})
+			podLogs, err := req.Stream(ctx)
+			if err != nil {
+				return err
+			}
+			defer podLogs.Close()
+			buf := new(bytes.Buffer)
+			_, err = io.Copy(buf, podLogs)
+			if err != nil {
+				return err
+			}
+			log.Infof("Pod %s:\n%s", pod.Name, buf.String())
+		}
+
+		return nil
+	}
+
 	// Wait job completion
 	for {
 		jobObj, err = k.client.BatchV1().Jobs(namespace).Get(ctx, longJobName, meta.GetOptions{})
@@ -123,9 +148,17 @@ func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string,
 
 		for _, condition := range jobObj.Status.Conditions {
 			if condition.Type == batch.JobFailed && condition.Status == core.ConditionTrue {
+				err = getLogs(jobObj.Name)
+				if err != nil {
+					log.Errorf("Error when try to read pods logs: %s", err.Error())
+				}
 				return errors.Errorf("Job %s failed: %s", longJobName, condition.Reason)
 			} else if condition.Type == batch.JobComplete && condition.Status == core.ConditionTrue {
 				log.Debugf("Job %s/%s completed successfully", namespace, longJobName)
+				err = getLogs(jobObj.Name)
+				if err != nil {
+					log.Errorf("Error when try to read pods logs: %s", err.Error())
+				}
 				return nil
 			}
 		}
@@ -133,5 +166,4 @@ func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string,
 		time.Sleep(5 * time.Second)
 	}
 
-	return err
 }
