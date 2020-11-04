@@ -125,3 +125,33 @@ Samble of command:
 ```bash
 kubetool --kubeconfig "C:\Users\user\.kube\config" unset-downtime --node-name node-01
 ```
+
+### Run patch management pre job
+
+It permit to lauch pre job for patchmanagement on given namespace.
+
+Sample of command:
+
+```bash
+kubetool --kubeconfig "C:\Users\user\.kube\config" run-pre-job --namespace test
+```
+
+### Run patch management post job
+
+It permit to lauch post job for patchmanagement on given namespace.
+
+Sample of command:
+
+```bash
+kubetool --kubeconfig "C:\Users\user\.kube\config" run-post-job --namespace test
+```
+
+### Clean evicted pods
+
+It permit to clean all pods that failed because of eviected.
+
+Sample of command:
+
+```bash
+kubetool --kubeconfig "C:\Users\user\.kube\config" clean-evicted-pods
+```
