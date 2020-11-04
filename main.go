@@ -135,6 +135,13 @@ func run(args []string) error {
 			},
 			Action: cmd.RunPostJob,
 		},
+		{
+			Name:     "clean-evicted-pods",
+			Usage:    "Clean all evicted pods that failed",
+			Category: "Clean",
+			Flags:    []cli.Flag{},
+			Action:   cmd.CleanEvictedPods,
+		},
 	}
 
 	app.Before = func(c *cli.Context) error {

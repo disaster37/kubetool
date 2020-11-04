@@ -72,3 +72,26 @@ func (k *Kubetool) WaitPodsOnNode(ctx context.Context, nodeName string) (err err
 	return nil
 
 }
+
+// CleanEvictedPods remove all pods failed because of Evicted
+func (k *Kubetool) CleanEvictedPods(ctx context.Context) (err error) {
+
+	pods, err := k.client.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	for _, pod := range pods.Items {
+		if pod.Status.Phase == v1.PodFailed && pod.Status.Reason == "Evicted" {
+			log.Debugf("Found pod to clean %s/%s", pod.Namespace, pod.Name)
+
+			err = k.client.CoreV1().Pods(pod.Namespace).Delete(ctx, pod.Name, metav1.DeleteOptions{})
+			if err != nil {
+				return err
+			}
+
+			log.Infof("Delete pod %s/%s successfully", pod.Namespace, pod.Name)
+		}
+	}
+
+	return nil
+}
