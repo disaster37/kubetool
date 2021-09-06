@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/disaster37/kubetool/v1.18/kubetool"
+	"github.com/disaster37/kubetool/v1.20/kubetool"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"

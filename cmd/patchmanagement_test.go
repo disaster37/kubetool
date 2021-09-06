@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/disaster37/kubetool/v1.18/kubetool"
+	"github.com/disaster37/kubetool/v1.20/kubetool"
 	"github.com/stretchr/testify/assert"
 	batch "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
@@ -865,103 +865,4 @@ func (s *TestSuite) TestUnsetDowntimeWhenPodsAndPostjobWitSecretAndUncordonSucce
 
 	err := unsetDowntime(context.TODO(), cmd, "fake-node")
 	assert.NoError(s.T(), err)
-}
-
-func (s *TestSuite) TestUncordonNodeForRecueWhenSuccess() {
-
-	fakeClient := fake.NewSimpleClientset()
-	fakeClient.Fake = fake.Clientset{}.Fake
-	fakeDiscovery := fakeClient.Discovery().(*discoveryfake.FakeDiscovery)
-	fakeDiscovery.FakedServerVersion = &version.Info{
-		Major: "1",
-		Minor: "18",
-	}
-
-	// Mock get node
-	fakeClient.Fake.AddReactor("get", "nodes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-		node := &v1.Node{
-			ObjectMeta: meta.ObjectMeta{
-				Name:              "fake-node",
-				CreationTimestamp: meta.Time{Time: time.Now()},
-			},
-			Status: v1.NodeStatus{
-				Conditions: []v1.NodeCondition{
-					{
-						Type:   v1.NodeReady,
-						Status: v1.ConditionTrue,
-					},
-				},
-			},
-			Spec: v1.NodeSpec{Unschedulable: true},
-		}
-
-		return true, node, nil
-	})
-
-	// Mock uncordon node
-	fakeClient.Fake.AddReactor("patch", "nodes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-		node := &v1.Node{
-			ObjectMeta: meta.ObjectMeta{
-				Name:              "fake-node",
-				CreationTimestamp: meta.Time{Time: time.Now()},
-			},
-			Status: v1.NodeStatus{
-				Conditions: []v1.NodeCondition{
-					{
-						Type:   v1.NodeReady,
-						Status: v1.ConditionTrue,
-					},
-				},
-			},
-			Spec: v1.NodeSpec{Unschedulable: false},
-		}
-
-		return true, node, nil
-	})
-
-	err := uncordonNodeForRecue(kubetool.NewConnexionFromClient(fakeClient), "fake-node")
-	assert.NoError(s.T(), err)
-
-}
-
-func (s *TestSuite) TestUncordonNodeForRecueWhenFailed() {
-
-	fakeClient := fake.NewSimpleClientset()
-	fakeClient.Fake = fake.Clientset{}.Fake
-	fakeDiscovery := fakeClient.Discovery().(*discoveryfake.FakeDiscovery)
-	fakeDiscovery.FakedServerVersion = &version.Info{
-		Major: "1",
-		Minor: "18",
-	}
-
-	// Mock get node
-	fakeClient.Fake.AddReactor("get", "nodes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-		node := &v1.Node{
-			ObjectMeta: meta.ObjectMeta{
-				Name:              "fake-node",
-				CreationTimestamp: meta.Time{Time: time.Now()},
-			},
-			Status: v1.NodeStatus{
-				Conditions: []v1.NodeCondition{
-					{
-						Type:   v1.NodeReady,
-						Status: v1.ConditionTrue,
-					},
-				},
-			},
-			Spec: v1.NodeSpec{Unschedulable: true},
-		}
-
-		return true, node, nil
-	})
-
-	// Mock uncordon node
-	fakeClient.Fake.AddReactor("patch", "nodes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-
-		return true, nil, errors.NewInternalError(fmt.Errorf("Uncordon failed"))
-	})
-
-	err := uncordonNodeForRecue(kubetool.NewConnexionFromClient(fakeClient), "fake-node")
-	assert.Error(s.T(), err, "Uncordon failed")
-
 }

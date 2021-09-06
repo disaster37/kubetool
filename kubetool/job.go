@@ -1,7 +1,6 @@
 package kubetool
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -88,7 +87,7 @@ func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string,
 					Containers: []core.Container{
 						{
 							Name:  jobName,
-							Image: "centos:7",
+							Image: "redhat/ubi8-minimal:latest",
 							Command: []string{
 								"/bin/sh",
 							},
@@ -96,12 +95,12 @@ func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string,
 							EnvFrom: secretList,
 							Resources: core.ResourceRequirements{
 								Limits: core.ResourceList{
-									"cpu":    resource.MustParse("1000m"),
+									"cpu":    resource.MustParse("500m"),
 									"memory": resource.MustParse("512Mi"),
 								},
 								Requests: core.ResourceList{
-									"cpu":    resource.MustParse("1000m"),
-									"memory": resource.MustParse("512Mi"),
+									"cpu":    resource.MustParse("200m"),
+									"memory": resource.MustParse("64Mi"),
 								},
 							},
 						},
@@ -128,12 +127,15 @@ func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string,
 				return err
 			}
 			defer podLogs.Close()
-			buf := new(bytes.Buffer)
-			_, err = io.Copy(buf, podLogs)
-			if err != nil {
-				return err
+			buf := make([]byte, 2048)
+			log.Infof("Logs from pod %s:", pod.Name)
+			for {
+				n, err := podLogs.Read(buf)
+				if err == io.EOF {
+					break
+				}
+				log.Infof("%s", string(buf[:n]))
 			}
-			log.Infof("Pod %s:\n%s", pod.Name, buf.String())
 		}
 
 		return nil

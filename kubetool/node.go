@@ -66,7 +66,7 @@ func (k *Kubetool) Drain(ctx context.Context, nodeName string, timeout time.Dura
 	drainer := &drain.Helper{
 		Ctx:                 ctx,
 		Client:              k.client,
-		DeleteLocalData:     true,
+		DeleteEmptyDirData:  true,
 		IgnoreAllDaemonSets: true,
 		Timeout:             timeout,
 		GracePeriodSeconds:  -1,

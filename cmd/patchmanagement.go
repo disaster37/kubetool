@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/disaster37/kubetool/v1.18/kubetool"
+	"github.com/disaster37/kubetool/v1.20/kubetool"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
@@ -34,15 +34,29 @@ func SetDowntime(c *cli.Context) error {
 	if err != nil {
 		log.Error(err.Error())
 
-		err = uncordonNodeForRecue(cmd, nodeName)
-		if err != nil {
-			// Rescue failed
-			log.Error(err.Error())
-			os.Exit(2)
-		}
+		if kubetool.IsRescueUncordon(err) {
+			err = cmd.Uncordon(context.Background(), nodeName)
+			if err != nil {
+				// Rescue failed
+				log.Errorf("Error when try to uncordon node %s on rescue step", nodeName)
+				log.Error(err.Error())
+				os.Exit(2)
+			}
 
-		// Rescue success
-		os.Exit(1)
+			log.Warningf("Node %s successfully uncordonned in rescue step", nodeName)
+			os.Exit(1)
+		} else if kubetool.IsRescuePostJob(err) {
+			err = unsetDowntime(ctx, cmd, nodeName)
+			if err != nil {
+				// Rescue failed
+				log.Errorf("Error when try to uncordon node %s and lauch post job on rescue step", nodeName)
+				log.Error(err.Error())
+				os.Exit(2)
+			}
+
+			log.Warningf("Node %s successfully uncordonned and post job lauch in rescue step", nodeName)
+			os.Exit(1)
+		}
 	}
 
 	return nil
@@ -66,30 +80,9 @@ func UnsetDowntime(c *cli.Context) error {
 
 	err = unsetDowntime(ctx, cmd, nodeName)
 	if err != nil {
-		log.Error(err.Error())
-		err = uncordonNodeForRecue(cmd, nodeName)
-		if err != nil {
-			// Rescue failed
-			log.Error(err.Error())
-			os.Exit(2)
-		}
-
-		// Rescue success
-		os.Exit(1)
-	}
-
-	return nil
-}
-
-// Try to uncordon node before exit
-func uncordonNodeForRecue(cmd *kubetool.Kubetool, nodeName string) (err error) {
-	err = cmd.Uncordon(context.Background(), nodeName)
-	if err != nil {
-		log.Errorf("Error when try to uncordon node %s on rescue step", nodeName)
 		return err
 	}
 
-	log.Warningf("Node %s successfully uncordonned in rescue step", nodeName)
 	return nil
 }
 
@@ -109,20 +102,20 @@ func setDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string) (
 	err = cmd.Cordon(ctx, nodeName)
 	if err != nil {
 		log.Errorf("Error when cordon node %s", nodeName)
-		return err
+		return kubetool.NewRescueUncordonError(err)
 	}
 
 	// List all namespace and lauch pre-job if needed
 	namespaces, err := cmd.NamespacesPodsOnNode(ctx, nodeName)
 	if err != nil {
 		log.Errorf("Error when get all namespace for node %s", nodeName)
-		return err
+		return kubetool.NewRescueUncordonError(err)
 	}
 	for _, namespace := range namespaces {
 		preScript, err := cmd.PreJobPatchManagement(ctx, namespace)
 		if err != nil {
 			log.Errorf("Error when try to get pre-job script on %s", namespace)
-			return err
+			return kubetool.NewRescueUncordonError(err)
 		}
 		if preScript != "" {
 			log.Infof("Pre script found on %s, running it...", namespace)
@@ -131,14 +124,14 @@ func setDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string) (
 			secrets, err := cmd.Secrets(ctx, namespace)
 			if err != nil {
 				log.Errorf("Error when try to get list of secrets to inject in job on %s", namespace)
-				return err
+				return kubetool.NewRescueUncordonError(err)
 			}
 
 			// Run job
 			err = cmd.RunJob(ctx, namespace, "pre-job", preScript, secrets)
 			if err != nil {
 				log.Errorf("Error when run pre-job for %s", namespace)
-				return err
+				return kubetool.NewRescuePostJobError(err)
 			}
 
 			log.Infof("Run pre-job successfully for %s", namespace)
@@ -149,7 +142,7 @@ func setDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string) (
 	err = cmd.Drain(ctx, nodeName, 600*time.Second)
 	if err != nil {
 		log.Errorf("Error when drain node %s", nodeName)
-		return err
+		return kubetool.NewRescuePostJobError(err)
 	}
 
 	log.Infof("Node %s is ready to be patched", nodeName)
