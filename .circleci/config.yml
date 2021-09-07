@@ -8,7 +8,7 @@ orbs:
 jobs:
   test:
     docker:
-      - image: circleci/golang:1.14
+      - image: circleci/golang:1.16
         environment:
           GO111MODULE: "on"
     working_directory: /go/kubetool
@@ -20,7 +20,7 @@ jobs:
           flags: unittest
   build:
     docker:
-      - image: circleci/golang:1.14
+      - image: circleci/golang:1.16
         environment:
           GO111MODULE: "on"
     working_directory: /go/kubetool
@@ -29,7 +29,7 @@ jobs:
       - run: make build
   release:
     docker:
-      - image: circleci/golang:1.14
+      - image: circleci/golang:1.16
         environment:
           GITHUB_TOKEN: $GITHUB_TOKEN
           CIRCLE_PROJECT_USERNAME: $CIRCLE_PROJECT_USERNAME
