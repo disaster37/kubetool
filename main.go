@@ -55,6 +55,16 @@ func run(args []string) error {
 					Name:  "node-name",
 					Usage: "The node name",
 				},
+				&cli.BoolFlag{
+					Name:  "retry-on-drain-failed",
+					Usage: "Retry if drain failed",
+					Value: false,
+				},
+				&cli.IntFlag{
+					Name:  "number-retry",
+					Usage: "How many retry",
+					Value: 3,
+				},
 			},
 			Action: cmd.SetDowntime,
 		},

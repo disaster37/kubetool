@@ -42,11 +42,11 @@ func (s *TestSuite) TestSetDowntimeWhenNodeNotReady() {
 	})
 	cmd := kubetool.NewConnexionFromClient(fakeClient)
 
-	err := setDowntime(context.TODO(), cmd, "fake-node")
+	err := setDowntime(context.TODO(), cmd, "fake-node", false, 0)
 	assert.Error(s.T(), err, "Node fake-node is not on ready state")
 }
 
-// When cordon node failed
+// When cordon node failed without retry
 // It must return error
 func (s *TestSuite) TestSetDowntimeWhenCordonFailed() {
 
@@ -84,7 +84,50 @@ func (s *TestSuite) TestSetDowntimeWhenCordonFailed() {
 	})
 	cmd := kubetool.NewConnexionFromClient(fakeClient)
 
-	err := setDowntime(context.TODO(), cmd, "fake-node")
+	err := setDowntime(context.TODO(), cmd, "fake-node", false, 0)
+	assert.Error(s.T(), err, "Cordon failed")
+
+}
+
+// When cordon node failed with retry
+// It must return error
+func (s *TestSuite) TestSetDowntimeWhenCordonFailedWithRetry() {
+
+	fakeClient := &fake.Clientset{}
+
+	// Mock get node
+	fakeClient.Fake.AddReactor("get", "nodes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+		node := &v1.Node{
+			ObjectMeta: meta.ObjectMeta{
+				Name:              "fake-node",
+				CreationTimestamp: meta.Time{Time: time.Now()},
+			},
+			Status: v1.NodeStatus{
+				Conditions: []v1.NodeCondition{
+					{
+						Type:   v1.NodeReady,
+						Status: v1.ConditionTrue,
+					},
+				},
+			},
+		}
+
+		return true, node, nil
+	})
+
+	// Mock cordon node
+	fakeClient.Fake.AddReactor("patch", "nodes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+
+		return true, nil, fmt.Errorf("Cordon failed")
+	})
+
+	// Trap all
+	fakeClient.Fake.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+		return true, nil, fmt.Errorf("no reaction implemented for %s", action)
+	})
+	cmd := kubetool.NewConnexionFromClient(fakeClient)
+
+	err := setDowntime(context.TODO(), cmd, "fake-node", true, 1)
 	assert.Error(s.T(), err, "Cordon failed")
 
 }
@@ -150,7 +193,7 @@ func (s *TestSuite) TestSetDowntimeWhenNoPodsAndDrainSuccess() {
 	})
 	cmd := kubetool.NewConnexionFromClient(fakeClient)
 
-	err := setDowntime(context.TODO(), cmd, "fake-node")
+	err := setDowntime(context.TODO(), cmd, "fake-node", false, 0)
 	assert.NoError(s.T(), err)
 
 }
@@ -257,7 +300,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainSuccess() {
 	})
 	cmd := kubetool.NewConnexionFromClient(fakeClient)
 
-	err := setDowntime(context.TODO(), cmd, "fake-node")
+	err := setDowntime(context.TODO(), cmd, "fake-node", false, 0)
 	assert.NoError(s.T(), err)
 
 }
@@ -365,7 +408,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainFailed() {
 	})
 	cmd := kubetool.NewConnexionFromClient(fakeClient)
 
-	err := setDowntime(context.TODO(), cmd, "fake-node")
+	err := setDowntime(context.TODO(), cmd, "fake-node", false, 0)
 	assert.Error(s.T(), err, "Failed to delete pod")
 
 }
@@ -512,7 +555,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndPrejobWitSecretAndDrainSuccess() {
 	})
 	cmd := kubetool.NewConnexionFromClient(fakeClient)
 
-	err := setDowntime(context.TODO(), cmd, "fake-node")
+	err := setDowntime(context.TODO(), cmd, "fake-node", false, 0)
 	assert.NoError(s.T(), err)
 }
 

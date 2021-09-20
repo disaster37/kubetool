@@ -29,8 +29,10 @@ func SetDowntime(c *cli.Context) error {
 	}
 
 	nodeName := c.String("node-name")
+	retryOnDrainFailed := c.Bool("retry-on-drain-failed")
+	nbRetry := c.Int("number-retry")
 
-	err = setDowntime(ctx, cmd, nodeName)
+	err = setDowntime(ctx, cmd, nodeName, retryOnDrainFailed, nbRetry)
 	if err != nil {
 		log.Error(err.Error())
 
@@ -86,7 +88,8 @@ func UnsetDowntime(c *cli.Context) error {
 	return nil
 }
 
-func setDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string) (err error) {
+// retry params permit to mitigeate when patch master node, the time the LB switch to another master node
+func setDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string, retryDrainOnFailed bool, nbRetry int) (err error) {
 	// check the node status
 	isOk, err := cmd.NodeOk(ctx, nodeName)
 	if err != nil {
@@ -139,10 +142,28 @@ func setDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string) (
 	}
 
 	// Drain node
-	err = cmd.Drain(ctx, nodeName, 600*time.Second)
-	if err != nil {
-		log.Errorf("Error when drain node %s", nodeName)
-		return kubetool.NewRescuePostJobError(err)
+
+	if retryDrainOnFailed {
+		currentRetry := 0
+		for currentRetry < nbRetry {
+			err = cmd.Drain(ctx, nodeName, 600*time.Second)
+			if err != nil {
+				log.Errorf("Error when drain node %s, retry in fes seconds ...", nodeName)
+				time.Sleep(10 * time.Second)
+			} else {
+				break
+			}
+		}
+		if err != nil {
+			return kubetool.NewRescuePostJobError(err)
+		}
+
+	} else {
+		err = cmd.Drain(ctx, nodeName, 600*time.Second)
+		if err != nil {
+			log.Errorf("Error when drain node %s", nodeName)
+			return kubetool.NewRescuePostJobError(err)
+		}
 	}
 
 	log.Infof("Node %s is ready to be patched", nodeName)
