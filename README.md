@@ -84,6 +84,8 @@ For exemple, before put on downtime node that hosted elasticsearch statefullset.
 You need to set following parameter:
 
 - **--node-name**: The node name to put on downtime
+- **--retry-on-drain-failed**: Retry drain node if error appear. Default to `false`
+- **--number-retry**: How many retry if drain failed. Default to `3`.
 
 It return the following code:
 
