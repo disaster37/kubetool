@@ -54,8 +54,7 @@ jobs:
           minikube status
 
           kubectl create namespace test
-          kubectl describe node minikube
-          kubectl run test --image=alpine -n test -- tail /dev/null
+          kubectl run test --image=alpine --namespace test -- tail /dev/null
       - name: Acceptance tests
         run: |
           #!/bin/bash
