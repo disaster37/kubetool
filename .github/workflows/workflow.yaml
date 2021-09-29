@@ -40,6 +40,7 @@ jobs:
         with:
           minikube version: 'v1.23.2'
           kubernetes version: 'v1.21.5'
+          driver: docker
       - name: Retrieve cli
         uses: actions/download-artifact@v2
         with:
@@ -48,9 +49,12 @@ jobs:
       - name: Setup tests
         run: |
           #!/bin/bash
-          set -e
+          #set -e
+
+          minikube status
 
           kubectl create namespace test
+          kubectl describe node minikube
           kubectl run test --image=alpine -n test -- tail /dev/null
       - name: Acceptance tests
         run: |
