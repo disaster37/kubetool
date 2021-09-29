@@ -21,7 +21,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: kubetool-artifact
-          path: ./kubetool
+          path: ./kubetool-cli
           retention-days: 1
   test:
     runs-on: ubuntu-latest
@@ -45,7 +45,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: kubetool-artifact
-          path: ./kubetool
+          path: ./kubetool-cli
       - name: Setup tests
         run: |
           #!/bin/bash
@@ -62,13 +62,13 @@ jobs:
           set -e
 
 
-          ./kubetool list-worker-nodes
-          ./kubetool list-master-nodes
-          ./kubetool set-downtime --node-name minikube
-          ./kubetool unset-downtime --node-name minikube
-          ./kubetool run-pre-job --namespace test
-          ./kubetool run-post-job --namespace test
-          ./kubetool clean-evicted-pods
+          ./kubetool-cli list-worker-nodes
+          ./kubetool-cli list-master-nodes
+          ./kubetool-cli set-downtime --node-name minikube
+          ./kubetool-cli unset-downtime --node-name minikube
+          ./kubetool-cli run-pre-job --namespace test
+          ./kubetool-cli run-post-job --namespace test
+          ./kubetool-cli clean-evicted-pods
       
       
       
