@@ -2,14 +2,12 @@ name: 'build / test / release'
 on:
   push:
     branches:
-      - main
-      - master
+      - '*'
     tags:
       - '*'
     pull_request:
       branches:
-        - main
-        - master
+        - '*'
 
 jobs:
   build:
@@ -51,7 +49,7 @@ jobs:
         run: |
           #!/bin/bash
           set -e
-          
+
           kubectl get nodes
       
       
