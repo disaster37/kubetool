@@ -61,6 +61,8 @@ jobs:
           #!/bin/bash
           set -e
 
+          chmod +x kubetool-cli
+
 
           ./kubetool-cli list-worker-nodes
           ./kubetool-cli list-master-nodes
