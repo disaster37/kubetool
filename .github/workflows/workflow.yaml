@@ -45,7 +45,7 @@ jobs:
         with:
           name: kubetool-artifact
           path: ./kubetool
-      - name: Setup tests:
+      - name: Setup tests
         run: |
           #!/bin/bash
           set -e
