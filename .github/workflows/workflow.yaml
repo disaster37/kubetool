@@ -61,8 +61,13 @@ jobs:
           set -e
 
 
-          kubectl get nodes
-          minikube node list
+          ./kubetool list-worker-nodes
+          ./kubetool list-master-nodes
+          ./kubetool set-downtime --node-name minikube
+          ./kubetool unset-downtime --node-name minikube
+          ./kubetool run-pre-job --namespace test
+          ./kubetool run-post-job --namespace test
+          ./kubetool clean-evicted-pods
       
       
       
