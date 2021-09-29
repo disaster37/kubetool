@@ -1,4 +1,4 @@
-module github.com/disaster37/kubetool/v1.20
+module github.com/disaster37/kubetool/v1.21
 
 go 1.16
 
@@ -10,8 +10,8 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/urfave/cli/v2 v2.3.0
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
-	k8s.io/api v0.20.10
-	k8s.io/apimachinery v0.20.10
-	k8s.io/client-go v0.20.10
-	k8s.io/kubectl v0.20.10
+	k8s.io/api v0.21.5
+	k8s.io/apimachinery v0.21.5
+	k8s.io/client-go v0.21.5
+	k8s.io/kubectl v0.21.5
 )

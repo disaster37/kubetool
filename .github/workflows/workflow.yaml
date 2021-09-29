@@ -1,0 +1,58 @@
+name: 'build / test / release'
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - '*'
+    pull_request:
+      branches:
+        - main
+        - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build
+        run: make build
+      - name: Temporarily save cli
+        uses: actions/upload-artifact@v2
+        with:
+          name: kubetool-artifact
+          path: ./kubetool
+          retention-days: 1
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Unit test
+        run: make test
+      - uses: codecov/codecov-action@v2
+        with:
+          files: coverage.txt
+          flags: unittests
+          fail_ci_if_error: true
+      - name: Setup Minikube
+        uses: manusa/actions-setup-minikube@v2.4.2
+        with:
+          minikube version: 'v1.23.2'
+          kubernetes version: 'v1.21.5'
+      - name: Retrieve cli
+        uses: actions/download-artifact@v2
+        with:
+          name: kubetool-artifact
+          path: ./kubetool
+      - name: Acceptance tests
+        run: |
+          #!/bin/bash
+          set -e
+          
+          kubectl get nodes
+      
+      
+      
