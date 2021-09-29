@@ -45,12 +45,21 @@ jobs:
         with:
           name: kubetool-artifact
           path: ./kubetool
+      - name: Setup tests:
+        run: |
+          #!/bin/bash
+          set -e
+
+          kubectl create namespace test
+          kubectl run test --image=alpine -n test -- tail /dev/null
       - name: Acceptance tests
         run: |
           #!/bin/bash
           set -e
 
+
           kubectl get nodes
+          minikube node list
       
       
       
