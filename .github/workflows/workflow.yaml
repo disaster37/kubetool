@@ -62,7 +62,7 @@ jobs:
           set -e
 
           chmod +x kubetool-cli
-          echo "kubeconfig: cat ${HOME}/.kube/config"
+          cat ${HOME}/.kube/config
 
 
           ./kubetool-cli list-worker-nodes
