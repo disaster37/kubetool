@@ -62,9 +62,6 @@ jobs:
           set -e
 
           chmod +x kubetool-cli
-          cat ${HOME}/.kube/config
-
-
           ./kubetool-cli list-worker-nodes
           ./kubetool-cli list-master-nodes
           ./kubetool-cli set-downtime --node-name minikube

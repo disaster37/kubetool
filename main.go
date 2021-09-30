@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"sort"
 
@@ -16,6 +17,13 @@ func run(args []string) error {
 	// Logger setting
 	log.SetOutput(os.Stdout)
 
+	// Get home directory
+	homePath, err := os.UserHomeDir()
+	if err != nil {
+		log.Warnf("Can't get home directory: %s", err.Error())
+		homePath = "/root"
+	}
+
 	// CLI settings
 	app := cli.NewApp()
 	app.Usage = "Extra kubernetes tools box"
@@ -29,7 +37,7 @@ func run(args []string) error {
 			Name:    "kubeconfig",
 			Usage:   "The kube config file",
 			EnvVars: []string{"KUBECONFIG"},
-			Value:   "$HOME/.kube/config",
+			Value:   fmt.Sprintf("%s/.kube/config", homePath),
 		}),
 		&cli.BoolFlag{
 			Name:  "debug",
@@ -176,7 +184,7 @@ func run(args []string) error {
 
 	sort.Sort(cli.CommandsByName(app.Commands))
 
-	err := app.Run(args)
+	err = app.Run(args)
 	return err
 }
 
