@@ -15,6 +15,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.16.7'
       - name: Build
         run: make build
       - name: Temporarily save cli
@@ -24,10 +28,15 @@ jobs:
           path: ./kubetool-cli
           retention-days: 1
   test:
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.16.7'
       - name: Unit test
         run: make test
       - uses: codecov/codecov-action@v2
@@ -70,6 +79,26 @@ jobs:
           ./kubetool-cli run-pre-job --namespace test
           ./kubetool-cli run-post-job --namespace test
           ./kubetool-cli clean-evicted-pods
-      
+
+  release:
+    needs: [test]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.16.7'
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       
       
