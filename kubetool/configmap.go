@@ -57,6 +57,10 @@ func (k *Kubetool) Secrets(ctx context.Context, namespace string) (secrets []str
 		}
 		return secrets, err
 	}
+	if _, ok := configMap.Data["secrets"]; !ok {
+		log.Debugf("No secrets found on %s", namespace)
+		return nil, nil
+	}
 
 	return strings.Split(configMap.Data["secrets"], ";"), err
 }
