@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: patchmanagement
+data:
+  pre-job: |
+    #!/bin/sh
+    echo "Fake pre job lauched"
+  post-job: |
+    #!/bin/sh
+    echo "Fake post job lauched"
+  

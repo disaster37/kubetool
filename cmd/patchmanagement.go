@@ -238,5 +238,7 @@ func unsetDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string)
 		return err
 	}
 
+	log.Infof("Node %s successfully cordonned", nodeName)
+
 	return nil
 }
