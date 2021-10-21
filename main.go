@@ -12,6 +12,9 @@ import (
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
+var version = "develop"
+var commit = ""
+
 func run(args []string) error {
 
 	// Logger setting
@@ -27,7 +30,7 @@ func run(args []string) error {
 	// CLI settings
 	app := cli.NewApp()
 	app.Usage = "Extra kubernetes tools box"
-	app.Version = "develop"
+	app.Version = fmt.Sprintf("%s-%s", version, commit)
 	app.Flags = []cli.Flag{
 		&cli.StringFlag{
 			Name:  "config",
