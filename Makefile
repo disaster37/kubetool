@@ -11,6 +11,6 @@ build: fmt
 ifeq ($(OS),Windows_NT)
 	go build -o  kubetool-cli.exe
 else
-	go build -o kubetool-cli
+	CGO_ENABLED=0 go build -o kubetool-cli
 endif
 	
