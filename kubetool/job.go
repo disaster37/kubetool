@@ -115,52 +115,56 @@ func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string,
 		return err
 	}
 
-	getLogs := func(jobName string) error {
+	getLogs := func(jobName string) {
+		podLogsOptions := &core.PodLogOptions{
+			Follow: true,
+		}
 		podList, err := k.client.CoreV1().Pods(namespace).List(ctx, meta.ListOptions{LabelSelector: "job-name=" + jobObj.Name})
 		if err != nil {
-			return err
+			log.Errorf("Error when list pods: %s", err.Error())
+			return
 		}
 		for _, pod := range podList.Items {
-			req := k.client.CoreV1().Pods(namespace).GetLogs(pod.Name, &core.PodLogOptions{})
+			req := k.client.CoreV1().Pods(namespace).GetLogs(pod.Name, podLogsOptions)
 			podLogs, err := req.Stream(ctx)
 			if err != nil {
-				return err
+				log.Errorf("Error when open stream logs: %s", err.Error())
+				return
 			}
 			defer podLogs.Close()
 			buf := make([]byte, 2048)
 			log.Infof("Logs from pod %s:", pod.Name)
 			for {
 				n, err := podLogs.Read(buf)
+				if n == 0 {
+					continue
+				}
 				if err == io.EOF {
 					break
+				}
+				if err != nil {
+					log.Errorf("Error when read stream logs: %s", err.Error())
+					return
 				}
 				log.Infof("%s", string(buf[:n]))
 			}
 		}
-
-		return nil
 	}
 
-	// Wait job completion
+	// Wait job completion and read logs
 	for {
 		jobObj, err = k.client.BatchV1().Jobs(namespace).Get(ctx, longJobName, meta.GetOptions{})
 		if err != nil {
 			return err
 		}
 
+		go getLogs(jobObj.Name)
+
 		for _, condition := range jobObj.Status.Conditions {
 			if condition.Type == batch.JobFailed && condition.Status == core.ConditionTrue {
-				err = getLogs(jobObj.Name)
-				if err != nil {
-					log.Errorf("Error when try to read pods logs: %s", err.Error())
-				}
 				return errors.Errorf("Job %s failed: %s", longJobName, condition.Reason)
 			} else if condition.Type == batch.JobComplete && condition.Status == core.ConditionTrue {
 				log.Debugf("Job %s/%s completed successfully", namespace, longJobName)
-				err = getLogs(jobObj.Name)
-				if err != nil {
-					log.Errorf("Error when try to read pods logs: %s", err.Error())
-				}
 				return nil
 			}
 		}
