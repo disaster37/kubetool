@@ -69,7 +69,7 @@ func (k *Kubetool) Drain(ctx context.Context, nodeName string, timeout time.Dura
 		DeleteEmptyDirData:  true,
 		IgnoreAllDaemonSets: true,
 		Timeout:             timeout,
-		GracePeriodSeconds:  -1,
+		GracePeriodSeconds:  30,
 		Out:                 os.Stdout,
 		ErrOut:              os.Stderr,
 		Force:               true,

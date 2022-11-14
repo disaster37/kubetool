@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/disaster37/kubetool/v1.21/kubetool"
+	"github.com/disaster37/kubetool/v1.23/kubetool"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"

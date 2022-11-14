@@ -4,14 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/disaster37/kubetool/v1.21/kubetool"
+	"github.com/disaster37/kubetool/v1.23/kubetool"
 	"github.com/stretchr/testify/assert"
 	batch "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/version"
 	discoveryfake "k8s.io/client-go/discovery/fake"
 	"k8s.io/client-go/kubernetes/fake"
 	k8stesting "k8s.io/client-go/testing"
@@ -20,12 +19,9 @@ import (
 func (s *TestSuite) TestRunPreJob() {
 
 	fakeClient := fake.NewSimpleClientset()
-	fakeClient.Fake = fake.Clientset{}.Fake
+	fakeClient.Fake = k8stesting.Fake{}
 	fakeDiscovery := fakeClient.Discovery().(*discoveryfake.FakeDiscovery)
-	fakeDiscovery.FakedServerVersion = &version.Info{
-		Major: "1",
-		Minor: "18",
-	}
+	fakeDiscovery.FakedServerVersion = FaikedVersion
 
 	// Mock list pod
 	fakeClient.Fake.AddReactor("list", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
@@ -123,12 +119,9 @@ func (s *TestSuite) TestRunPreJob() {
 func (s *TestSuite) TestRunPostJob() {
 
 	fakeClient := fake.NewSimpleClientset()
-	fakeClient.Fake = fake.Clientset{}.Fake
+	fakeClient.Fake = k8stesting.Fake{}
 	fakeDiscovery := fakeClient.Discovery().(*discoveryfake.FakeDiscovery)
-	fakeDiscovery.FakedServerVersion = &version.Info{
-		Major: "1",
-		Minor: "18",
-	}
+	fakeDiscovery.FakedServerVersion = FaikedVersion
 
 	// Mock list pod
 	fakeClient.Fake.AddReactor("list", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {

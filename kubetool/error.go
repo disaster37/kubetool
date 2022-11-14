@@ -3,7 +3,7 @@ package kubetool
 import "github.com/pkg/errors"
 
 const (
-	errNotReady        string = "nodeNotReady"
+	errNotReady        			  = "nodeNotReady"
 	rescueTypeUncodron        = "uncordon"
 	rescueTypePostJob         = "postJob"
 )

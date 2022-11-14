@@ -3,7 +3,7 @@ package cmd
 import (
 	"context"
 
-	"github.com/disaster37/kubetool/v1.21/kubetool"
+	"github.com/disaster37/kubetool/v1.23/kubetool"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

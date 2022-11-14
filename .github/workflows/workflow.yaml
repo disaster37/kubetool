@@ -5,7 +5,7 @@ on:
       - '*'
     tags:
       - '*'
-    pull_request:
+  pull_request:
       branches:
         - '*'
 
@@ -18,7 +18,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v2
         with:
-          go-version: '1.16.7'
+          go-version: '1.19'
       - name: Build
         run: make build
       - name: Temporarily save cli
@@ -36,7 +36,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v2
         with:
-          go-version: '1.16.7'
+          go-version: '1.19'
       - name: Unit test
         run: make test
       - uses: codecov/codecov-action@v2
@@ -47,8 +47,8 @@ jobs:
       - name: Setup Minikube
         uses: manusa/actions-setup-minikube@v2.4.2
         with:
-          minikube version: 'v1.23.2'
-          kubernetes version: 'v1.21.5'
+          minikube version: 'v1.28.0'
+          kubernetes version: 'v1.23.13'
           driver: docker
       - name: Retrieve cli
         uses: actions/download-artifact@v2
@@ -90,7 +90,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v2
         with:
-          go-version: '1.16.7'
+          go-version: '1.19'
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
