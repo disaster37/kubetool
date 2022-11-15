@@ -11,7 +11,7 @@ You can use it to handle patch management on kubernetes nodes. It's attempt to m
 ## Contribute
 
 You PR are always welcome. Please use the righ branch to do PR:
- - v1.21 for Kubernetes 1.21.X
+ - v1.23 for Kubernetes 1.23.X
 Don't forget to add test if you add some functionalities.
 
 To build, you can use the following command line:
