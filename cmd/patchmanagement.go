@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/disaster37/kubetool/v1.21/kubetool"
+	"github.com/disaster37/kubetool/v1.23/kubetool"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
@@ -148,13 +148,14 @@ func setDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string, r
 		for currentRetry < nbRetry {
 			err = cmd.Drain(ctx, nodeName, 600*time.Second)
 			if err != nil {
-				log.Errorf("Error when drain node %s, retry in fes seconds ...", nodeName)
+				log.Errorf("Error when drain node %s, retry in few seconds ...", nodeName)
 				time.Sleep(10 * time.Second)
 			} else {
 				break
 			}
 		}
 		if err != nil {
+			log.Errorf("Error when drain node %s", nodeName)
 			return kubetool.NewRescuePostJobError(err)
 		}
 

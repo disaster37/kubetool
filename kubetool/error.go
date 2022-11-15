@@ -3,9 +3,9 @@ package kubetool
 import "github.com/pkg/errors"
 
 const (
-	errNotReady        string = "nodeNotReady"
-	rescueTypeUncodron        = "uncordon"
-	rescueTypePostJob         = "postJob"
+	errNotReady        = "nodeNotReady"
+	rescueTypeUncodron = "uncordon"
+	rescueTypePostJob  = "postJob"
 )
 
 // Errors represent typed error
