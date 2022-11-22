@@ -158,7 +158,7 @@ func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string,
 			return err
 		}
 
-		go getLogs(jobObj.Name)
+		getLogs(jobObj.Name)
 
 		for _, condition := range jobObj.Status.Conditions {
 			if condition.Type == batch.JobFailed && condition.Status == core.ConditionTrue {
