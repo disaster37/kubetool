@@ -15,6 +15,11 @@ import (
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+type logSync struct {
+	err chan error
+	stop chan bool
+}
+
 // RunJob permit to execute script as Job in kubernetes cluster
 func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string, job string, secrets []string) (err error) {
 	if job == "" {
@@ -115,60 +120,25 @@ func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string,
 		return err
 	}
 
-	getLogs := func(jobName string) {
-		podLogsOptions := &core.PodLogOptions{
-			Follow: true,
-		}
-		podList, err := k.client.CoreV1().Pods(namespace).List(ctx, meta.ListOptions{LabelSelector: "job-name=" + jobObj.Name})
-		if err != nil {
-			log.Errorf("Error when list pods: %s", err.Error())
-			return
-		}
-		for _, pod := range podList.Items {
-			req := k.client.CoreV1().Pods(namespace).GetLogs(pod.Name, podLogsOptions)
-			podLogs, err := req.Stream(ctx)
-			if err != nil {
-				log.Errorf("Error when open stream logs: %s", err.Error())
-				return
-			}
-			defer podLogs.Close()
-			buf := make([]byte, 2048)
-			log.Infof("Logs from pod %s:", pod.Name)
-			for {
-				n, err := podLogs.Read(buf)
-				if n == 0 {
-					continue
-				}
-				if err == io.EOF {
-					break
-				}
-				if err != nil {
-					log.Errorf("Error when read stream logs: %s", err.Error())
-					return
-				}
-				log.Infof("%s", string(buf[:n]))
-			}
-		}
-	}
-
 	// Wait job completion and read logs
+	ctrl := k.getLogs(ctx, namespace, longJobName)
 	for {
 		select{
-		case <- ctx.Done():
-			return errors.Errorf("Tiemout when wait Job %s", longJobName)
+		case err := <- ctrl.err:
+			return err
 		default:
 			jobObj, err = k.client.BatchV1().Jobs(namespace).Get(ctx, longJobName, meta.GetOptions{})
 			if err != nil {
 				return err
 			}
 
-			getLogs(jobObj.Name)
-
 			for _, condition := range jobObj.Status.Conditions {
 				if condition.Type == batch.JobFailed && condition.Status == core.ConditionTrue {
+					ctrl.stop <- true
 					return errors.Errorf("Job %s failed: %s", longJobName, condition.Reason)
 				} else if condition.Type == batch.JobComplete && condition.Status == core.ConditionTrue {
 					log.Debugf("Job %s/%s completed successfully", namespace, longJobName)
+					ctrl.stop <- true
 					return nil
 				}
 			}
@@ -177,4 +147,62 @@ func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string,
 		}
 	}
 
+}
+
+func (k *Kubetool) getLogs(ctx context.Context, namespace string, podName string) (ctrl logSync) {
+	ctrl = logSync{
+		err: make(chan error),
+		stop: make(chan bool),
+	}
+
+	go func(){
+		podLogsOptions := &core.PodLogOptions{
+			Follow: true,
+		}
+
+		// Wait pod start
+		for {
+			podList, err := k.client.CoreV1().Pods(namespace).List(ctx, meta.ListOptions{LabelSelector: "job-name=" + podName})
+			if err != nil {
+				log.Errorf("Error when list pods: %s", err.Error())
+				return
+			}
+			for _, pod := range podList.Items {
+				req := k.client.CoreV1().Pods(namespace).GetLogs(pod.Name, podLogsOptions)
+				podLogs, err := req.Stream(ctx)
+				if err != nil {
+					log.Errorf("Error when open stream logs: %s", err.Error())
+					return
+				}
+				defer podLogs.Close()
+				buf := make([]byte, 2048)
+				log.Infof("Logs from pod %s:", pod.Name)
+				for {
+					select {
+					case <- ctx.Done():
+						ctrl.err <- errors.New("Timeout when read logs")
+						return
+					case <-ctrl.stop:
+						return
+					default:
+						n, err := podLogs.Read(buf)
+						if n == 0 {
+							continue
+						}
+						if err == io.EOF {
+							break
+						}
+						if err != nil {
+							ctrl.err <- errors.Wrap(err, "Error when read stream logs")
+							return
+						}
+						log.Infof("%s", string(buf[:n]))
+					}
+				}
+			}
+			time.Sleep(time.Second * 1)
+		}
+	}()
+
+	return ctrl
 }
