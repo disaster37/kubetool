@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"os"
+	"time"
 
 	"github.com/disaster37/kubetool/v1.23/kubetool"
 	"github.com/pkg/errors"
@@ -82,7 +83,8 @@ func runPostJob(ctx context.Context, cmd *kubetool.Kubetool, namespace string) (
 	}
 
 	// Run postjob
-	err = cmd.RunJob(ctx, namespace, "post-job", postJob, secrets)
+	ctxWithTimeout, _ := context.WithTimeout(ctx, time.Minute * 30)
+	err = cmd.RunJob(ctxWithTimeout, namespace, "post-job", postJob, secrets)
 	if err != nil {
 		return err
 	}
@@ -109,7 +111,8 @@ func runPreJob(ctx context.Context, cmd *kubetool.Kubetool, namespace string) (e
 	}
 
 	// Run postjob
-	err = cmd.RunJob(ctx, namespace, "pre-job", postJob, secrets)
+	ctxWithTimeout, _ := context.WithTimeout(ctx, time.Minute * 30)
+	err = cmd.RunJob(ctxWithTimeout, namespace, "pre-job", postJob, secrets)
 	if err != nil {
 		return err
 	}

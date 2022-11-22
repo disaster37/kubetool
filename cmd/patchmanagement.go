@@ -131,7 +131,8 @@ func setDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string, r
 			}
 
 			// Run job
-			err = cmd.RunJob(ctx, namespace, "pre-job", preScript, secrets)
+			ctxWithTimeout, _ := context.WithTimeout(ctx, time.Minute * 30)
+			err = cmd.RunJob(ctxWithTimeout, namespace, "pre-job", preScript, secrets)
 			if err != nil {
 				log.Errorf("Error when run pre-job for %s", namespace)
 				return kubetool.NewRescuePostJobError(err)
@@ -142,7 +143,6 @@ func setDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string, r
 	}
 
 	// Drain node
-
 	if retryDrainOnFailed {
 		currentRetry := 0
 		for currentRetry < nbRetry {
@@ -223,7 +223,8 @@ func unsetDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string)
 			}
 
 			// Run job
-			err = cmd.RunJob(ctx, namespace, "post-job", postScript, secrets)
+			ctxWithTimeout, _ := context.WithTimeout(ctx, time.Minute * 30)
+			err = cmd.RunJob(ctxWithTimeout, namespace, "post-job", postScript, secrets)
 			if err != nil {
 				log.Errorf("Error when run post-job for %s: %s", namespace, err.Error())
 				return err

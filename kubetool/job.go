@@ -153,23 +153,28 @@ func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string,
 
 	// Wait job completion and read logs
 	for {
-		jobObj, err = k.client.BatchV1().Jobs(namespace).Get(ctx, longJobName, meta.GetOptions{})
-		if err != nil {
-			return err
-		}
-
-		getLogs(jobObj.Name)
-
-		for _, condition := range jobObj.Status.Conditions {
-			if condition.Type == batch.JobFailed && condition.Status == core.ConditionTrue {
-				return errors.Errorf("Job %s failed: %s", longJobName, condition.Reason)
-			} else if condition.Type == batch.JobComplete && condition.Status == core.ConditionTrue {
-				log.Debugf("Job %s/%s completed successfully", namespace, longJobName)
-				return nil
+		select{
+		case <- ctx.Done():
+			return errors.Errorf("Tiemout when wait Job %s", longJobName)
+		default:
+			jobObj, err = k.client.BatchV1().Jobs(namespace).Get(ctx, longJobName, meta.GetOptions{})
+			if err != nil {
+				return err
 			}
-		}
 
-		time.Sleep(5 * time.Second)
+			getLogs(jobObj.Name)
+
+			for _, condition := range jobObj.Status.Conditions {
+				if condition.Type == batch.JobFailed && condition.Status == core.ConditionTrue {
+					return errors.Errorf("Job %s failed: %s", longJobName, condition.Reason)
+				} else if condition.Type == batch.JobComplete && condition.Status == core.ConditionTrue {
+					log.Debugf("Job %s/%s completed successfully", namespace, longJobName)
+					return nil
+				}
+			}
+
+			time.Sleep(5 * time.Second)
+		}
 	}
 
 }
