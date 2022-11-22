@@ -16,7 +16,7 @@ import (
 )
 
 type logSync struct {
-	err chan error
+	err  chan error
 	stop chan bool
 }
 
@@ -123,12 +123,13 @@ func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string,
 	// Wait job completion and read logs
 	ctrl := k.getLogs(ctx, namespace, longJobName)
 	for {
-		select{
-		case err := <- ctrl.err:
+		select {
+		case err := <-ctrl.err:
 			return err
 		default:
 			jobObj, err = k.client.BatchV1().Jobs(namespace).Get(ctx, longJobName, meta.GetOptions{})
 			if err != nil {
+				ctrl.stop <- true
 				return err
 			}
 
@@ -151,56 +152,64 @@ func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string,
 
 func (k *Kubetool) getLogs(ctx context.Context, namespace string, podName string) (ctrl logSync) {
 	ctrl = logSync{
-		err: make(chan error),
-		stop: make(chan bool),
+		err:  make(chan error, 1),
+		stop: make(chan bool, 1),
 	}
 
-	go func(){
+	go func() {
 		podLogsOptions := &core.PodLogOptions{
 			Follow: true,
 		}
 
 		// Wait pod start
 		for {
-			podList, err := k.client.CoreV1().Pods(namespace).List(ctx, meta.ListOptions{LabelSelector: "job-name=" + podName})
-			if err != nil {
-				log.Errorf("Error when list pods: %s", err.Error())
+			select {
+			case <-ctx.Done():
+				ctrl.err <- errors.New("Timeout when read logs")
 				return
-			}
-			for _, pod := range podList.Items {
-				req := k.client.CoreV1().Pods(namespace).GetLogs(pod.Name, podLogsOptions)
-				podLogs, err := req.Stream(ctx)
+			case <-ctrl.stop:
+				return
+			default:
+				podList, err := k.client.CoreV1().Pods(namespace).List(ctx, meta.ListOptions{LabelSelector: "job-name=" + podName})
 				if err != nil {
-					log.Errorf("Error when open stream logs: %s", err.Error())
+					ctrl.err <- errors.Wrap(err, "Error when list pods")
 					return
 				}
-				defer podLogs.Close()
-				buf := make([]byte, 2048)
-				log.Infof("Logs from pod %s:", pod.Name)
-				for {
-					select {
-					case <- ctx.Done():
-						ctrl.err <- errors.New("Timeout when read logs")
+				for _, pod := range podList.Items {
+					req := k.client.CoreV1().Pods(namespace).GetLogs(pod.Name, podLogsOptions)
+					podLogs, err := req.Stream(ctx)
+					if err != nil {
+						ctrl.err <- errors.Wrap(err, "Error when open stream log")
 						return
-					case <-ctrl.stop:
-						return
-					default:
-						n, err := podLogs.Read(buf)
-						if n == 0 {
-							continue
-						}
-						if err == io.EOF {
-							break
-						}
-						if err != nil {
-							ctrl.err <- errors.Wrap(err, "Error when read stream logs")
+					}
+					defer podLogs.Close()
+					buf := make([]byte, 2048)
+					log.Infof("Logs from pod %s:", pod.Name)
+					for {
+						select {
+						case <-ctx.Done():
+							ctrl.err <- errors.New("Timeout when read logs")
 							return
+						case <-ctrl.stop:
+							return
+						default:
+							n, err := podLogs.Read(buf)
+							if n == 0 {
+								continue
+							}
+							if err == io.EOF {
+								break
+							}
+							if err != nil {
+								ctrl.err <- errors.Wrap(err, "Error when read stream logs")
+								return
+							}
+							log.Infof("%s", string(buf[:n]))
 						}
-						log.Infof("%s", string(buf[:n]))
 					}
 				}
+				time.Sleep(time.Second * 1)
 			}
-			time.Sleep(time.Second * 1)
 		}
 	}()
 

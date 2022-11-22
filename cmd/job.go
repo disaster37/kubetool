@@ -83,7 +83,7 @@ func runPostJob(ctx context.Context, cmd *kubetool.Kubetool, namespace string) (
 	}
 
 	// Run postjob
-	ctxWithTimeout, _ := context.WithTimeout(ctx, time.Minute * 30)
+	ctxWithTimeout, _ := context.WithTimeout(ctx, time.Minute*30)
 	err = cmd.RunJob(ctxWithTimeout, namespace, "post-job", postJob, secrets)
 	if err != nil {
 		return err
@@ -111,7 +111,7 @@ func runPreJob(ctx context.Context, cmd *kubetool.Kubetool, namespace string) (e
 	}
 
 	// Run postjob
-	ctxWithTimeout, _ := context.WithTimeout(ctx, time.Minute * 30)
+	ctxWithTimeout, _ := context.WithTimeout(ctx, time.Minute*30)
 	err = cmd.RunJob(ctxWithTimeout, namespace, "pre-job", postJob, secrets)
 	if err != nil {
 		return err
