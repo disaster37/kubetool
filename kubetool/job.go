@@ -179,8 +179,8 @@ func (k *Kubetool) getLogs(ctx context.Context, namespace string, podName string
 					req := k.client.CoreV1().Pods(namespace).GetLogs(pod.Name, podLogsOptions)
 					podLogs, err := req.Stream(ctx)
 					if err != nil {
-						ctrl.err <- errors.Wrap(err, "Error when open stream log")
-						return
+						log.Errorf("Error when open stream log :%s", err.Error())
+						continue
 					}
 					defer podLogs.Close()
 					buf := make([]byte, 2048)
