@@ -107,9 +107,9 @@ func (k *Kubetool) DeleteTerminatingPodsOnNode(ctx context.Context, nodeName str
 
 	// Check if pod on terminating state
 	for _, pod := range pods.Items {
-		if pod.ObjectMeta.DeletionTimestamp != nil && pod.ObjectMeta.DeletionTimestamp.After(time.Now().Add(maxTime)) {
+		if pod.ObjectMeta.DeletionTimestamp != nil && pod.ObjectMeta.DeletionTimestamp.Add(maxTime).Before(time.Now()) {
 			log.Debugf("Force delete pod %s", pod.Name)
-			if err = k.client.CoreV1().Pods("").Delete(ctx, pod.Name, metav1.DeleteOptions{
+			if err = k.client.CoreV1().Pods(pod.Namespace).Delete(ctx, pod.Name, metav1.DeleteOptions{
 				GracePeriodSeconds: pointer.Int64(0),
 			}); err != nil {
 				return errors.Wrapf(err, "Error when force delete pod %s", pod.Name)
