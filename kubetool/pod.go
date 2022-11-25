@@ -6,9 +6,11 @@ import (
 	"time"
 
 	"github.com/mpvl/unique"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 )
 
 // NamespacesPodsOnNode return a list of unique Namespace pod hosted on node
@@ -90,6 +92,28 @@ func (k *Kubetool) CleanEvictedPods(ctx context.Context) (err error) {
 			}
 
 			log.Infof("Delete pod %s/%s successfully", pod.Namespace, pod.Name)
+		}
+	}
+
+	return nil
+}
+
+func (k *Kubetool) DeleteTerminatingPodsOnNode(ctx context.Context, nodeName string, maxTime time.Duration) (err error) {
+
+	// Get pods on node
+	pods, err := k.client.CoreV1().Pods("").List(ctx, metav1.ListOptions{
+		FieldSelector: "spec.nodeName=" + nodeName,
+	})
+
+	// Check if pod on terminating state
+	for _, pod := range pods.Items {
+		if pod.ObjectMeta.DeletionTimestamp != nil && pod.ObjectMeta.DeletionTimestamp.After(time.Now().Add(maxTime)) {
+			log.Debugf("Force delete pod %s", pod.Name)
+			if err = k.client.CoreV1().Pods("").Delete(ctx, pod.Name, metav1.DeleteOptions{
+				GracePeriodSeconds: pointer.Int64(0),
+			}); err != nil {
+				return errors.Wrapf(err, "Error when force delete pod %s", pod.Name)
+			}
 		}
 	}
 

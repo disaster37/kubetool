@@ -191,6 +191,10 @@ func (s *TestSuite) TestSetDowntimeWhenNoPodsAndDrainSuccess() {
 		return true, pods, nil
 	})
 
+	fakeClient.Fake.AddReactor("get", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+		return true, nil, nil
+	})
+
 	// Trap all
 	fakeClient.Fake.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, fmt.Errorf("no reaction implemented for %s", action)
