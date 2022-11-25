@@ -69,13 +69,30 @@ func (k *Kubetool) Drain(ctx context.Context, nodeName string, timeout time.Dura
 		DeleteEmptyDirData:  true,
 		IgnoreAllDaemonSets: true,
 		Timeout:             timeout,
-		GracePeriodSeconds:  30,
+		GracePeriodSeconds:  -1,
 		Out:                 os.Stdout,
 		ErrOut:              os.Stderr,
 		Force:               true,
 	}
 
+	endGC := make(chan bool, 1)
+	go func() {
+		waitTime := 30 * time.Second
+		for {
+			select {
+			case <-endGC:
+				return
+			default:
+				if err := k.DeleteTerminatingPodsOnNode(ctx, nodeName, waitTime); err != nil {
+					log.Error(err.Error())
+				}
+			}
+		}
+	}()
+
 	err = drain.RunNodeDrain(drainer, node.Name)
+
+	endGC <- true
 
 	return err
 }
