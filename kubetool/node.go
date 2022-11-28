@@ -77,15 +77,16 @@ func (k *Kubetool) Drain(ctx context.Context, nodeName string, timeout time.Dura
 
 	endGC := make(chan bool, 1)
 	go func() {
-		waitTime := 30 * time.Second
+		defaultWaitTime := 30 * time.Second
 		for {
 			select {
 			case <-endGC:
 				return
 			default:
-				if err := k.DeleteTerminatingPodsOnNode(ctx, nodeName, waitTime); err != nil {
+				if err := k.DeleteTerminatingPodsOnNode(ctx, nodeName, defaultWaitTime); err != nil {
 					log.Error(err.Error())
 				}
+				time.Sleep(5 * time.Second)
 			}
 		}
 	}()
