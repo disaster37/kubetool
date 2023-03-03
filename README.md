@@ -78,7 +78,7 @@ It perform the following actions:
   If exist, it will lauch job with the contend oh the key `pre-job` as shell script.
 - Drain the node
 
-If you need to run extra actions before stop pods hosted on node, you can add configmap `patchmanagement` on application namespace with the key `pre-script`. If you need expose somes secrets as environment variable to use them on script, you can add the key `secrets` with the list of secret to inject on job.
+If you need to run extra actions before stop pods hosted on node, you can add configmap `patchmanagement` on application namespace with the key `pre-script`. If you need expose somes secrets as environment variable to use them on script, you can add the key `secrets` with the list of secret to inject on job. You can also use key `image` to specify image docker to use.
 For exemple, before put on downtime node that hosted elasticsearch statefullset. You should put shard allocation on primary and stop services like ILM, SLM, watcher.
 
 You need to set following parameter:
