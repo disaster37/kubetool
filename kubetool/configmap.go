@@ -24,9 +24,10 @@ func (k *Kubetool) GetJobSpec(ctx context.Context, namespace string) (job *Job, 
 	}
 
 	job = &Job{
-		PreJob:  configMap.Data["pre-job"],
-		PostJob: configMap.Data["post-job"],
-		Image:   configMap.Data["image"],
+		PreJob:      configMap.Data["pre-job"],
+		PostJob:     configMap.Data["post-job"],
+		Image:       configMap.Data["image"],
+		SecretNames: make([]string, 0),
 	}
 
 	if job.Image == "" {
@@ -37,7 +38,12 @@ func (k *Kubetool) GetJobSpec(ctx context.Context, namespace string) (job *Job, 
 		log.Debugf("No secrets found on %s", namespace)
 	}
 
-	job.SecretNames = strings.Split(configMap.Data["secrets"], ";")
+	secrets := strings.Split(configMap.Data["secrets"], ";")
+	for _, name := range secrets {
+		if name != "" {
+			job.SecretNames = append(job.SecretNames, name)
+		}
+	}
 
 	return job, nil
 }
