@@ -124,7 +124,8 @@ func setDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string, r
 			log.Infof("Pre script found on %s, running it...", namespace)
 
 			// Run job
-			ctxWithTimeout, _ := context.WithTimeout(ctx, time.Minute*30)
+			ctxWithTimeout, cancelFun := context.WithTimeout(ctx, time.Minute*30)
+			defer cancelFun()
 			err = cmd.RunJob(ctxWithTimeout, namespace, "pre-job", jobSpec.PreJob, jobSpec.Image, jobSpec.SecretNames)
 			if err != nil {
 				log.Errorf("Error when run pre-job for %s", namespace)
@@ -209,7 +210,8 @@ func unsetDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string)
 			log.Infof("Post script found on %s, running it...", namespace)
 
 			// Run job
-			ctxWithTimeout, _ := context.WithTimeout(ctx, time.Minute*30)
+			ctxWithTimeout, cancelFunc := context.WithTimeout(ctx, time.Minute*30)
+			defer cancelFunc()
 			err = cmd.RunJob(ctxWithTimeout, namespace, "post-job", jobSpec.PostJob, jobSpec.Image, jobSpec.SecretNames)
 			if err != nil {
 				log.Errorf("Error when run post-job for %s: %s", namespace, err.Error())

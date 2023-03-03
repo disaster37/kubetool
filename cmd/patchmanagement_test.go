@@ -302,7 +302,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainSuccess() {
 	})
 	cmd := kubetool.NewConnexionFromClient(fakeClient)
 
-	setDowntime(context.TODO(), cmd, "fake-node", false, 0)
+	_ = setDowntime(context.TODO(), cmd, "fake-node", false, 0)
 	// No more working
 	//err := setDowntime(context.TODO(), cmd, "fake-node", false, 0)
 	//assert.NoError(s.T(), err)
@@ -553,7 +553,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndPrejobWitSecretAndDrainSuccess() {
 	})
 	cmd := kubetool.NewConnexionFromClient(fakeClient)
 
-	setDowntime(context.TODO(), cmd, "fake-node", false, 0)
+	_ = setDowntime(context.TODO(), cmd, "fake-node", false, 0)
 	//no more working
 	//err := setDowntime(context.TODO(), cmd, "fake-node", false, 0)
 	//assert.NoError(s.T(), err)

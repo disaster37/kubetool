@@ -122,7 +122,7 @@ func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string,
 		},
 	}
 
-	jobObj, err = k.client.BatchV1().Jobs(namespace).Create(ctx, jobObj, meta.CreateOptions{})
+	_, err = k.client.BatchV1().Jobs(namespace).Create(ctx, jobObj, meta.CreateOptions{})
 	if err != nil {
 		return err
 	}

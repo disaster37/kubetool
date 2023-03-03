@@ -104,6 +104,9 @@ func (k *Kubetool) DeleteTerminatingPodsOnNode(ctx context.Context, nodeName str
 	pods, err := k.client.CoreV1().Pods("").List(ctx, metav1.ListOptions{
 		FieldSelector: "spec.nodeName=" + nodeName,
 	})
+	if err != nil {
+		return err
+	}
 
 	// Check if pod on terminating state
 	for _, pod := range pods.Items {
