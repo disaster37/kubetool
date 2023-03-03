@@ -67,24 +67,17 @@ func RunPreJob(c *cli.Context) error {
 func runPostJob(ctx context.Context, cmd *kubetool.Kubetool, namespace string) (err error) {
 
 	// Get post job
-	postJob, err := cmd.PostJobPatchManagement(ctx, namespace)
+	jobSpec, err := cmd.GetJobSpec(ctx, namespace)
 	if err != nil {
 		return err
 	}
-	if postJob == "" {
+	if jobSpec == nil || jobSpec.PostJob == "" {
 		return errors.Errorf("Post job not found in namespace %s", namespace)
-	}
-
-	// Get list of secrets needed for inject in job
-	secrets, err := cmd.Secrets(ctx, namespace)
-	if err != nil {
-		log.Errorf("Error when try to get list of secrets to inject in job on %s: %s", namespace, err.Error())
-		return err
 	}
 
 	// Run postjob
 	ctxWithTimeout, _ := context.WithTimeout(ctx, time.Minute*30)
-	err = cmd.RunJob(ctxWithTimeout, namespace, "post-job", postJob, secrets)
+	err = cmd.RunJob(ctxWithTimeout, namespace, "post-job", jobSpec.PostJob, jobSpec.Image, jobSpec.SecretNames)
 	if err != nil {
 		return err
 	}
@@ -95,24 +88,17 @@ func runPostJob(ctx context.Context, cmd *kubetool.Kubetool, namespace string) (
 func runPreJob(ctx context.Context, cmd *kubetool.Kubetool, namespace string) (err error) {
 
 	// Get pre job
-	postJob, err := cmd.PreJobPatchManagement(ctx, namespace)
+	jobSpec, err := cmd.GetJobSpec(ctx, namespace)
 	if err != nil {
 		return err
 	}
-	if postJob == "" {
+	if jobSpec == nil || jobSpec.PreJob == "" {
 		return errors.Errorf("Pre job not found in namespace %s", namespace)
-	}
-
-	// Get list of secrets needed for inject in job
-	secrets, err := cmd.Secrets(ctx, namespace)
-	if err != nil {
-		log.Errorf("Error when try to get list of secrets to inject in job on %s: %s", namespace, err.Error())
-		return err
 	}
 
 	// Run postjob
 	ctxWithTimeout, _ := context.WithTimeout(ctx, time.Minute*30)
-	err = cmd.RunJob(ctxWithTimeout, namespace, "pre-job", postJob, secrets)
+	err = cmd.RunJob(ctxWithTimeout, namespace, "pre-job", jobSpec.PreJob, jobSpec.Image, jobSpec.SecretNames)
 	if err != nil {
 		return err
 	}

@@ -20,8 +20,15 @@ type logSync struct {
 	stop chan bool
 }
 
+type Job struct {
+	Image       string
+	SecretNames []string
+	PreJob      string
+	PostJob     string
+}
+
 // RunJob permit to execute script as Job in kubernetes cluster
-func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string, job string, secrets []string) (err error) {
+func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string, job string, image string, secrets []string) (err error) {
 	if job == "" {
 		log.Info("Empty job, skip it")
 		return err
@@ -92,7 +99,7 @@ func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string,
 					Containers: []core.Container{
 						{
 							Name:  jobName,
-							Image: "redhat/ubi8-minimal:latest",
+							Image: image,
 							Command: []string{
 								"/bin/sh",
 							},

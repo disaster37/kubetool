@@ -115,24 +115,17 @@ func setDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string, r
 		return kubetool.NewRescueUncordonError(err)
 	}
 	for _, namespace := range namespaces {
-		preScript, err := cmd.PreJobPatchManagement(ctx, namespace)
+		jobSpec, err := cmd.GetJobSpec(ctx, namespace)
 		if err != nil {
 			log.Errorf("Error when try to get pre-job script on %s", namespace)
 			return kubetool.NewRescueUncordonError(err)
 		}
-		if preScript != "" {
+		if jobSpec == nil || jobSpec.PreJob != "" {
 			log.Infof("Pre script found on %s, running it...", namespace)
-
-			// Get list of secrets needed for inject in job
-			secrets, err := cmd.Secrets(ctx, namespace)
-			if err != nil {
-				log.Errorf("Error when try to get list of secrets to inject in job on %s", namespace)
-				return kubetool.NewRescueUncordonError(err)
-			}
 
 			// Run job
 			ctxWithTimeout, _ := context.WithTimeout(ctx, time.Minute*30)
-			err = cmd.RunJob(ctxWithTimeout, namespace, "pre-job", preScript, secrets)
+			err = cmd.RunJob(ctxWithTimeout, namespace, "pre-job", jobSpec.PreJob, jobSpec.Image, jobSpec.SecretNames)
 			if err != nil {
 				log.Errorf("Error when run pre-job for %s", namespace)
 				return kubetool.NewRescuePostJobError(err)
@@ -207,24 +200,17 @@ func unsetDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string)
 		return err
 	}
 	for _, namespace := range namespaces {
-		postScript, err := cmd.PostJobPatchManagement(ctx, namespace)
+		jobSpec, err := cmd.GetJobSpec(ctx, namespace)
 		if err != nil {
 			log.Errorf("Error when try to get post-job script on %s: %s", namespace, err.Error())
 			return err
 		}
-		if postScript != "" {
+		if jobSpec == nil || jobSpec.PostJob != "" {
 			log.Infof("Post script found on %s, running it...", namespace)
-
-			// Get list of secrets needed for inject in job
-			secrets, err := cmd.Secrets(ctx, namespace)
-			if err != nil {
-				log.Errorf("Error when try to get list of secrets to inject in job on %s: %s", namespace, err.Error())
-				return err
-			}
 
 			// Run job
 			ctxWithTimeout, _ := context.WithTimeout(ctx, time.Minute*30)
-			err = cmd.RunJob(ctxWithTimeout, namespace, "post-job", postScript, secrets)
+			err = cmd.RunJob(ctxWithTimeout, namespace, "post-job", jobSpec.PostJob, jobSpec.Image, jobSpec.SecretNames)
 			if err != nil {
 				log.Errorf("Error when run post-job for %s: %s", namespace, err.Error())
 				return err
