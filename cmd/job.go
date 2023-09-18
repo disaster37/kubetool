@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/disaster37/kubetool/v1.23/kubetool"
-	"github.com/pkg/errors"
+	"emperror.dev/errors"
+	"github.com/disaster37/kubetool/v1.28/kubetool"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
@@ -78,7 +78,7 @@ func runPostJob(ctx context.Context, cmd *kubetool.Kubetool, namespace string) (
 	// Run postjob
 	ctxWithTimeout, cancelFunc := context.WithTimeout(ctx, time.Minute*30)
 	defer cancelFunc()
-	err = cmd.RunJob(ctxWithTimeout, namespace, "post-job", jobSpec.PostJob, jobSpec.Image, jobSpec.SecretNames)
+	err = cmd.RunJob(ctxWithTimeout, namespace, "post-job", jobSpec.PostJob, jobSpec.Image, jobSpec.SecretNames, "")
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func runPreJob(ctx context.Context, cmd *kubetool.Kubetool, namespace string) (e
 	// Run postjob
 	ctxWithTimeout, cancelFunc := context.WithTimeout(ctx, time.Minute*30)
 	defer cancelFunc()
-	err = cmd.RunJob(ctxWithTimeout, namespace, "pre-job", jobSpec.PreJob, jobSpec.Image, jobSpec.SecretNames)
+	err = cmd.RunJob(ctxWithTimeout, namespace, "pre-job", jobSpec.PreJob, jobSpec.Image, jobSpec.SecretNames, "")
 	if err != nil {
 		return err
 	}

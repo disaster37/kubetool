@@ -1,6 +1,6 @@
 package kubetool
 
-import "github.com/pkg/errors"
+import "emperror.dev/errors"
 
 const (
 	errNotReady        = "nodeNotReady"

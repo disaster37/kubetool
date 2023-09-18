@@ -6,7 +6,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/pkg/errors"
+	"emperror.dev/errors"
 	log "github.com/sirupsen/logrus"
 	batch "k8s.io/api/batch/v1"
 	core "k8s.io/api/core/v1"
@@ -28,7 +28,7 @@ type Job struct {
 }
 
 // RunJob permit to execute script as Job in kubernetes cluster
-func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string, job string, image string, secrets []string) (err error) {
+func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string, job string, image string, secrets []string, nodeName string) (err error) {
 	if job == "" {
 		log.Info("Empty job, skip it")
 		return err
@@ -103,7 +103,13 @@ func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string,
 							Command: []string{
 								"/bin/sh",
 							},
-							Args:    []string{"-c", job},
+							Args: []string{"-c", job},
+							Env: []core.EnvVar{
+								{
+									Name:  "NODE_NAME",
+									Value: nodeName,
+								},
+							},
 							EnvFrom: secretList,
 							Resources: core.ResourceRequirements{
 								Limits: core.ResourceList{

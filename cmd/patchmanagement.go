@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/disaster37/kubetool/v1.23/kubetool"
+	"github.com/disaster37/kubetool/v1.28/kubetool"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
@@ -120,13 +120,13 @@ func setDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string, r
 			log.Errorf("Error when try to get pre-job script on %s", namespace)
 			return kubetool.NewRescueUncordonError(err)
 		}
-		if jobSpec == nil || jobSpec.PreJob != "" {
+		if jobSpec != nil && jobSpec.PreJob != "" {
 			log.Infof("Pre script found on %s, running it...", namespace)
 
 			// Run job
 			ctxWithTimeout, cancelFun := context.WithTimeout(ctx, time.Minute*30)
 			defer cancelFun()
-			err = cmd.RunJob(ctxWithTimeout, namespace, "pre-job", jobSpec.PreJob, jobSpec.Image, jobSpec.SecretNames)
+			err = cmd.RunJob(ctxWithTimeout, namespace, "pre-job", jobSpec.PreJob, jobSpec.Image, jobSpec.SecretNames, nodeName)
 			if err != nil {
 				log.Errorf("Error when run pre-job for %s", namespace)
 				return kubetool.NewRescuePostJobError(err)
@@ -206,13 +206,13 @@ func unsetDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string)
 			log.Errorf("Error when try to get post-job script on %s: %s", namespace, err.Error())
 			return err
 		}
-		if jobSpec == nil || jobSpec.PostJob != "" {
+		if jobSpec != nil && jobSpec.PostJob != "" {
 			log.Infof("Post script found on %s, running it...", namespace)
 
 			// Run job
 			ctxWithTimeout, cancelFunc := context.WithTimeout(ctx, time.Minute*30)
 			defer cancelFunc()
-			err = cmd.RunJob(ctxWithTimeout, namespace, "post-job", jobSpec.PostJob, jobSpec.Image, jobSpec.SecretNames)
+			err = cmd.RunJob(ctxWithTimeout, namespace, "post-job", jobSpec.PostJob, jobSpec.Image, jobSpec.SecretNames, nodeName)
 			if err != nil {
 				log.Errorf("Error when run post-job for %s: %s", namespace, err.Error())
 				return err

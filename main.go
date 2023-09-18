@@ -5,7 +5,7 @@ import (
 	"os"
 	"sort"
 
-	"github.com/disaster37/kubetool/v1.23/cmd"
+	"github.com/disaster37/kubetool/v1.28/cmd"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"github.com/urfave/cli/v2/altsrc"

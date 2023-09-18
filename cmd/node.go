@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/disaster37/kubetool/v1.23/kubetool"
+	"github.com/disaster37/kubetool/v1.28/kubetool"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
