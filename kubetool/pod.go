@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 // NamespacesPodsOnNode return a list of unique Namespace pod hosted on node
@@ -116,7 +116,7 @@ func (k *Kubetool) DeleteTerminatingPodsOnNode(ctx context.Context, nodeName str
 		if pod.ObjectMeta.DeletionTimestamp != nil && pod.ObjectMeta.DeletionTimestamp.Add(maxTime).Before(time.Now()) {
 			log.Debugf("Force delete pod %s", pod.Name)
 			if err = k.client.CoreV1().Pods(pod.Namespace).Delete(ctx, pod.Name, metav1.DeleteOptions{
-				GracePeriodSeconds: pointer.Int64(0),
+				GracePeriodSeconds: ptr.To[int64](0),
 			}); err != nil {
 				return errors.Wrapf(err, "Error when force delete pod %s", pod.Name)
 			}
