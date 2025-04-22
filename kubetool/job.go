@@ -195,7 +195,7 @@ func (k *Kubetool) getLogs(ctx context.Context, namespace string, podName string
 						log.Errorf("Error when open stream log :%s", err.Error())
 						continue
 					}
-					defer podLogs.Close()
+					defer func() { _ = podLogs.Close() }()
 					buf := make([]byte, 2048)
 					log.Infof("Logs from pod %s:", pod.Name)
 					for {

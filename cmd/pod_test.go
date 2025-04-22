@@ -22,7 +22,7 @@ func (s *TestSuite) TestCleanEvictedNodes() {
 	fakeDiscovery.FakedServerVersion = FaikedVersion
 
 	// Mock list pod
-	fakeClient.Fake.AddReactor("list", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	fakeClient.AddReactor("list", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		pods := &v1.PodList{
 			Items: []v1.Pod{
 				{
@@ -40,12 +40,12 @@ func (s *TestSuite) TestCleanEvictedNodes() {
 	})
 
 	// Mock delete pod
-	fakeClient.Fake.AddReactor("delete", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	fakeClient.AddReactor("delete", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, nil
 	})
 
 	// Trap all
-	fakeClient.Fake.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	fakeClient.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, fmt.Errorf("no reaction implemented for %s", action)
 	})
 	cmd := kubetool.NewConnexionFromClient(fakeClient)

@@ -24,7 +24,7 @@ func (s *TestSuite) TestRunPreJob() {
 	fakeDiscovery.FakedServerVersion = FaikedVersion
 
 	// Mock list pod
-	fakeClient.Fake.AddReactor("list", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	fakeClient.AddReactor("list", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		pods := &v1.PodList{
 			Items: []v1.Pod{
 				{
@@ -42,13 +42,13 @@ func (s *TestSuite) TestRunPreJob() {
 	})
 
 	// Mock get pod
-	fakeClient.Fake.AddReactor("get", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	fakeClient.AddReactor("get", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 
 		return true, nil, errors.NewNotFound(v1.Resource("pods"), "pod")
 	})
 
 	// Mock get configmap
-	fakeClient.Fake.AddReactor("get", "configmaps", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	fakeClient.AddReactor("get", "configmaps", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 
 		configmap := &v1.ConfigMap{
 			ObjectMeta: meta.ObjectMeta{
@@ -65,14 +65,14 @@ func (s *TestSuite) TestRunPreJob() {
 	})
 
 	// Mock delete pod
-	fakeClient.Fake.AddReactor("delete", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	fakeClient.AddReactor("delete", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, nil
 	})
 
 	// Mock get jobs
 	// First time for old job, and next that job is finished
 	countCallJob := 0
-	fakeClient.Fake.AddReactor("get", "jobs", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	fakeClient.AddReactor("get", "jobs", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		if countCallJob == 0 {
 			// Call when look if jon already exist
 			countCallJob++
@@ -100,14 +100,14 @@ func (s *TestSuite) TestRunPreJob() {
 	})
 
 	// Mock create job
-	fakeClient.Fake.AddReactor("create", "jobs", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	fakeClient.AddReactor("create", "jobs", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		createAction := action.(k8stesting.CreateAction)
 
 		return true, createAction.GetObject(), nil
 	})
 
 	// Trap all
-	fakeClient.Fake.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	fakeClient.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, fmt.Errorf("no reaction implemented for %s", action)
 	})
 	cmd := kubetool.NewConnexionFromClient(fakeClient)
@@ -124,7 +124,7 @@ func (s *TestSuite) TestRunPostJob() {
 	fakeDiscovery.FakedServerVersion = FaikedVersion
 
 	// Mock list pod
-	fakeClient.Fake.AddReactor("list", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	fakeClient.AddReactor("list", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		pods := &v1.PodList{
 			Items: []v1.Pod{
 				{
@@ -142,13 +142,13 @@ func (s *TestSuite) TestRunPostJob() {
 	})
 
 	// Mock get pod
-	fakeClient.Fake.AddReactor("get", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	fakeClient.AddReactor("get", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 
 		return true, nil, errors.NewNotFound(v1.Resource("pods"), "pod")
 	})
 
 	// Mock get configmap
-	fakeClient.Fake.AddReactor("get", "configmaps", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	fakeClient.AddReactor("get", "configmaps", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 
 		configmap := &v1.ConfigMap{
 			ObjectMeta: meta.ObjectMeta{
@@ -165,14 +165,14 @@ func (s *TestSuite) TestRunPostJob() {
 	})
 
 	// Mock delete pod
-	fakeClient.Fake.AddReactor("delete", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	fakeClient.AddReactor("delete", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, nil
 	})
 
 	// Mock get jobs
 	// First time for old job, and next that job is finished
 	countCallJob := 0
-	fakeClient.Fake.AddReactor("get", "jobs", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	fakeClient.AddReactor("get", "jobs", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		if countCallJob == 0 {
 			// Call when look if jon already exist
 			countCallJob++
@@ -200,14 +200,14 @@ func (s *TestSuite) TestRunPostJob() {
 	})
 
 	// Mock create job
-	fakeClient.Fake.AddReactor("create", "jobs", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	fakeClient.AddReactor("create", "jobs", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		createAction := action.(k8stesting.CreateAction)
 
 		return true, createAction.GetObject(), nil
 	})
 
 	// Trap all
-	fakeClient.Fake.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	fakeClient.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, fmt.Errorf("no reaction implemented for %s", action)
 	})
 	cmd := kubetool.NewConnexionFromClient(fakeClient)

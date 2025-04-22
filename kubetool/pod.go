@@ -113,7 +113,7 @@ func (k *Kubetool) DeleteTerminatingPodsOnNode(ctx context.Context, nodeName str
 		if pod.Spec.TerminationGracePeriodSeconds != nil && *pod.Spec.TerminationGracePeriodSeconds > 0 {
 			maxTime = time.Duration(*pod.Spec.TerminationGracePeriodSeconds) * time.Second
 		}
-		if pod.ObjectMeta.DeletionTimestamp != nil && pod.ObjectMeta.DeletionTimestamp.Add(maxTime).Before(time.Now()) {
+		if pod.DeletionTimestamp != nil && pod.DeletionTimestamp.Add(maxTime).Before(time.Now()) {
 			log.Debugf("Force delete pod %s", pod.Name)
 			if err = k.client.CoreV1().Pods(pod.Namespace).Delete(ctx, pod.Name, metav1.DeleteOptions{
 				GracePeriodSeconds: ptr.To[int64](0),
