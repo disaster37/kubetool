@@ -58,6 +58,8 @@ func SetDowntime(c *cli.Context) error {
 
 			log.Warningf("Node %s successfully uncordonned and post job lauch in rescue step", nodeName)
 			os.Exit(1)
+		} else {
+			os.Exit(2)
 		}
 	}
 
