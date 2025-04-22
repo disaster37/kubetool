@@ -14,19 +14,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Setup Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
           go-version: '1.24'
       - name: Build
         run: make build
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v7
         with:
           version: latest
       - name: Temporarily save cli
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: kubetool-artifact
           path: ./kubetool-cli
@@ -36,26 +36,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Setup Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
           go-version: '1.24'
       - name: Unit test
         run: make test
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v5
         with:
           files: coverage.txt
           flags: unittests
           fail_ci_if_error: false
       - name: Setup Minikube
-        uses: manusa/actions-setup-minikube@v2.7.2
+        uses: manusa/actions-setup-minikube@v2.13.1
         with:
-          minikube version: 'v1.31.2'
-          kubernetes version: 'v1.27.4'
+          minikube version: 'v1.35.0'
+          kubernetes version: 'v1.32.0'
           driver: docker
       - name: Retrieve cli
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: kubetool-artifact
           path: .
@@ -90,13 +90,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Setup Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
           go-version: '1.24'
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v4
         with:
           distribution: goreleaser
           version: latest
