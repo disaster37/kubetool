@@ -66,3 +66,7 @@ func getWorkerNodes(ctx context.Context, cmd *kubetool.Kubetool) (workers []stri
 func getMasterNodes(ctx context.Context, cmd *kubetool.Kubetool) (workers []string, err error) {
 	return cmd.MasterNodes(ctx)
 }
+
+func getDataNodes(ctx context.Context, cmd *kubetool.Kubetool) (workers []string, err error) {
+	return cmd.DataNodes(ctx)
+}

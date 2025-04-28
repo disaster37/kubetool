@@ -53,6 +53,23 @@ func GetNodesForRundeck(c *cli.Context) error {
 		}
 	}
 
+	// Process data nodes
+	nodes, err = getDataNodes(ctx, cmd)
+	if err != nil {
+		return err
+	}
+	for _, node := range nodes {
+		result[node] = RundeckNodeEntry{
+			NodeName:               node,
+			Hostname:               node,
+			SSHKeyStoragePath:      c.String("ssh-key-storage-path"),
+			SSHPasswordStoragePath: c.String("ssh-password-storage-path"),
+			Username:               c.String("username"),
+			Tags:                   fmt.Sprintf("%s,data", c.String("cluster-name")),
+			SSHAuthentication:      c.String("ssh-authentication"),
+		}
+	}
+
 	// Process worker nodes
 	nodes, err = getWorkerNodes(ctx, cmd)
 	if err != nil {

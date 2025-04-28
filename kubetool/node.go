@@ -13,7 +13,7 @@ import (
 
 // WorkerNodes permit to return the list of all worker nodes
 func (k *Kubetool) WorkerNodes(ctx context.Context) (nodes []string, err error) {
-	nodeList, err := k.client.CoreV1().Nodes().List(ctx, metav1.ListOptions{LabelSelector: "master!=true"})
+	nodeList, err := k.client.CoreV1().Nodes().List(ctx, metav1.ListOptions{LabelSelector: "master!=true,longhorn!=true"})
 	if err != nil {
 		return nodes, err
 	}
@@ -28,6 +28,20 @@ func (k *Kubetool) WorkerNodes(ctx context.Context) (nodes []string, err error) 
 // MasterNodes permit to return the list of master nodes
 func (k *Kubetool) MasterNodes(ctx context.Context) (nodes []string, err error) {
 	nodeList, err := k.client.CoreV1().Nodes().List(ctx, metav1.ListOptions{LabelSelector: "master=true"})
+	if err != nil {
+		return nodes, err
+	}
+
+	for _, node := range nodeList.Items {
+		nodes = append(nodes, node.Name)
+	}
+
+	return nodes, err
+}
+
+// DataNodes permit to return the list of data nodes
+func (k *Kubetool) DataNodes(ctx context.Context) (nodes []string, err error) {
+	nodeList, err := k.client.CoreV1().Nodes().List(ctx, metav1.ListOptions{LabelSelector: "longhorn=true"})
 	if err != nil {
 		return nodes, err
 	}
