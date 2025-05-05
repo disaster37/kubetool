@@ -24,7 +24,9 @@ func (s *TestSuite) TestcleanLonghornPendingBackup() {
 	fakeDiscovery.FakedServerVersion = FaikedVersion
 
 	sh := scheme.Scheme
-	longhorn.AddToScheme(sh)
+	if err := longhorn.AddToScheme(sh); err != nil {
+		panic(err)
+	}
 	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh)
 
 	// Mock list backups
