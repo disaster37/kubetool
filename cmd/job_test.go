@@ -12,8 +12,10 @@ import (
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	discoveryfake "k8s.io/client-go/discovery/fake"
+	dynamicFake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
 	k8stesting "k8s.io/client-go/testing"
+	"k8s.io/kubectl/pkg/scheme"
 )
 
 func (s *TestSuite) TestRunPreJob() {
@@ -22,6 +24,9 @@ func (s *TestSuite) TestRunPreJob() {
 	fakeClient.Fake = k8stesting.Fake{}
 	fakeDiscovery := fakeClient.Discovery().(*discoveryfake.FakeDiscovery)
 	fakeDiscovery.FakedServerVersion = FaikedVersion
+
+	sh := scheme.Scheme
+	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh)
 
 	// Mock list pod
 	fakeClient.AddReactor("list", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
@@ -110,7 +115,7 @@ func (s *TestSuite) TestRunPreJob() {
 	fakeClient.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, fmt.Errorf("no reaction implemented for %s", action)
 	})
-	cmd := kubetool.NewConnexionFromClient(fakeClient)
+	cmd := kubetool.NewConnexionFromClient(fakeClient, dynamicFakeClient)
 
 	err := runPreJob(context.Background(), cmd, "fake-namespace")
 	assert.NoError(s.T(), err)
@@ -122,6 +127,9 @@ func (s *TestSuite) TestRunPostJob() {
 	fakeClient.Fake = k8stesting.Fake{}
 	fakeDiscovery := fakeClient.Discovery().(*discoveryfake.FakeDiscovery)
 	fakeDiscovery.FakedServerVersion = FaikedVersion
+
+	sh := scheme.Scheme
+	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh)
 
 	// Mock list pod
 	fakeClient.AddReactor("list", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
@@ -210,7 +218,7 @@ func (s *TestSuite) TestRunPostJob() {
 	fakeClient.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, fmt.Errorf("no reaction implemented for %s", action)
 	})
-	cmd := kubetool.NewConnexionFromClient(fakeClient)
+	cmd := kubetool.NewConnexionFromClient(fakeClient, dynamicFakeClient)
 
 	err := runPostJob(context.Background(), cmd, "fake-namespace")
 	assert.NoError(s.T(), err)

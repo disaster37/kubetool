@@ -7,10 +7,15 @@ import (
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	dynamicFake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
+	"k8s.io/kubectl/pkg/scheme"
 )
 
 func (s *TestSuite) TestGetWorkerNodes() {
+
+	sh := scheme.Scheme
+	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh)
 
 	fakeClient := fake.NewSimpleClientset(
 		&v1.Node{
@@ -31,7 +36,7 @@ func (s *TestSuite) TestGetWorkerNodes() {
 		},
 	)
 
-	cmd := kubetool.NewConnexionFromClient(fakeClient)
+	cmd := kubetool.NewConnexionFromClient(fakeClient, dynamicFakeClient)
 
 	nodes, err := getWorkerNodes(context.TODO(), cmd)
 	assert.NoError(s.T(), err)
@@ -40,6 +45,9 @@ func (s *TestSuite) TestGetWorkerNodes() {
 
 func (s *TestSuite) TestGetMasterNodes() {
 
+	sh := scheme.Scheme
+	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh)
+
 	fakeClient := fake.NewSimpleClientset(
 		&v1.Node{
 			ObjectMeta: metav1.ObjectMeta{
@@ -59,7 +67,7 @@ func (s *TestSuite) TestGetMasterNodes() {
 		},
 	)
 
-	cmd := kubetool.NewConnexionFromClient(fakeClient)
+	cmd := kubetool.NewConnexionFromClient(fakeClient, dynamicFakeClient)
 
 	nodes, err := getMasterNodes(context.TODO(), cmd)
 	assert.NoError(s.T(), err)

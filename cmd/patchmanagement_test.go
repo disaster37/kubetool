@@ -12,7 +12,9 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/kubectl/pkg/scheme"
 
+	dynamicFake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
 	k8stesting "k8s.io/client-go/testing"
 )
@@ -23,6 +25,9 @@ func (s *TestSuite) TestSetDowntimeWhenNodeNotReady() {
 
 	fakeClient := fake.NewSimpleClientset()
 	fakeClient.Fake = k8stesting.Fake{}
+
+	sh := scheme.Scheme
+	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh)
 
 	// Mock get node
 	fakeClient.AddReactor("get", "nodes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
@@ -41,7 +46,7 @@ func (s *TestSuite) TestSetDowntimeWhenNodeNotReady() {
 	fakeClient.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, fmt.Errorf("no reaction implemented for %s", action)
 	})
-	cmd := kubetool.NewConnexionFromClient(fakeClient)
+	cmd := kubetool.NewConnexionFromClient(fakeClient, dynamicFakeClient)
 
 	err := setDowntime(context.TODO(), cmd, "fake-node", false, 0)
 	assert.Error(s.T(), err, "Node fake-node is not on ready state")
@@ -53,6 +58,9 @@ func (s *TestSuite) TestSetDowntimeWhenCordonFailed() {
 
 	fakeClient := fake.NewSimpleClientset()
 	fakeClient.Fake = k8stesting.Fake{}
+
+	sh := scheme.Scheme
+	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh)
 
 	// Mock get node
 	fakeClient.AddReactor("get", "nodes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
@@ -84,7 +92,7 @@ func (s *TestSuite) TestSetDowntimeWhenCordonFailed() {
 	fakeClient.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, fmt.Errorf("no reaction implemented for %s", action)
 	})
-	cmd := kubetool.NewConnexionFromClient(fakeClient)
+	cmd := kubetool.NewConnexionFromClient(fakeClient, dynamicFakeClient)
 
 	err := setDowntime(context.TODO(), cmd, "fake-node", false, 0)
 	assert.Error(s.T(), err, "Cordon failed")
@@ -98,6 +106,9 @@ func (s *TestSuite) TestSetDowntimeWhenCordonFailedWithRetry() {
 	fakeClient := fake.NewSimpleClientset()
 	fakeClient.Fake = k8stesting.Fake{}
 
+	sh := scheme.Scheme
+	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh)
+
 	// Mock get node
 	fakeClient.AddReactor("get", "nodes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		node := &v1.Node{
@@ -128,7 +139,7 @@ func (s *TestSuite) TestSetDowntimeWhenCordonFailedWithRetry() {
 	fakeClient.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, fmt.Errorf("no reaction implemented for %s", action)
 	})
-	cmd := kubetool.NewConnexionFromClient(fakeClient)
+	cmd := kubetool.NewConnexionFromClient(fakeClient, dynamicFakeClient)
 
 	err := setDowntime(context.TODO(), cmd, "fake-node", true, 1)
 	assert.Error(s.T(), err, "Cordon failed")
@@ -141,6 +152,9 @@ func (s *TestSuite) TestSetDowntimeWhenNoPodsAndDrainSuccess() {
 
 	fakeClient := fake.NewSimpleClientset()
 	fakeClient.Fake = k8stesting.Fake{}
+
+	sh := scheme.Scheme
+	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh)
 
 	// Mock get node
 	fakeClient.AddReactor("get", "nodes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
@@ -199,7 +213,7 @@ func (s *TestSuite) TestSetDowntimeWhenNoPodsAndDrainSuccess() {
 	fakeClient.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, fmt.Errorf("no reaction implemented for %s", action)
 	})
-	cmd := kubetool.NewConnexionFromClient(fakeClient)
+	cmd := kubetool.NewConnexionFromClient(fakeClient, dynamicFakeClient)
 
 	err := setDowntime(context.TODO(), cmd, "fake-node", false, 0)
 	assert.NoError(s.T(), err)
@@ -211,6 +225,8 @@ func (s *TestSuite) TestSetDowntimeWhenNoPodsAndDrainSuccess() {
 func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainSuccess() {
 
 	fakeClient := fake.NewSimpleClientset()
+	sh := scheme.Scheme
+	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh)
 
 	// Mock get node
 	fakeClient.AddReactor("get", "nodes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
@@ -300,7 +316,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainSuccess() {
 	fakeClient.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, fmt.Errorf("no reaction implemented for %s", action)
 	})
-	cmd := kubetool.NewConnexionFromClient(fakeClient)
+	cmd := kubetool.NewConnexionFromClient(fakeClient, dynamicFakeClient)
 
 	_ = setDowntime(context.TODO(), cmd, "fake-node", false, 0)
 	// No more working
@@ -317,6 +333,9 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainFailed() {
 	fakeClient.Fake = k8stesting.Fake{}
 	//fakeDiscovery := fakeClient.Discovery().(*discoveryfake.FakeDiscovery)
 	//fakeDiscovery.FakedServerVersion = FaikedVersion
+
+	sh := scheme.Scheme
+	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh)
 
 	// Mock get node
 	fakeClient.AddReactor("get", "nodes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
@@ -407,7 +426,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainFailed() {
 	fakeClient.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, fmt.Errorf("no reaction implemented for %s", action)
 	})
-	cmd := kubetool.NewConnexionFromClient(fakeClient)
+	cmd := kubetool.NewConnexionFromClient(fakeClient, dynamicFakeClient)
 
 	err := setDowntime(context.TODO(), cmd, "fake-node", false, 0)
 	assert.Error(s.T(), err, "Failed to delete pod")
@@ -422,6 +441,9 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndPrejobWitSecretAndDrainSuccess() {
 	fakeClient.Fake = k8stesting.Fake{}
 	//fakeDiscovery := fakeClient.Discovery().(*discoveryfake.FakeDiscovery)
 	//fakeDiscovery.FakedServerVersion = FaikedVersion
+
+	sh := scheme.Scheme
+	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh)
 
 	// Mock get node
 	fakeClient.AddReactor("get", "nodes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
@@ -551,7 +573,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndPrejobWitSecretAndDrainSuccess() {
 	fakeClient.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, fmt.Errorf("no reaction implemented for %s", action)
 	})
-	cmd := kubetool.NewConnexionFromClient(fakeClient)
+	cmd := kubetool.NewConnexionFromClient(fakeClient, dynamicFakeClient)
 
 	_ = setDowntime(context.TODO(), cmd, "fake-node", false, 0)
 	//no more working
@@ -565,6 +587,9 @@ func (s *TestSuite) TestUnsetDowntimeWhenUncordonFailed() {
 
 	fakeClient := fake.NewSimpleClientset()
 	fakeClient.Fake = k8stesting.Fake{}
+
+	sh := scheme.Scheme
+	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh)
 
 	// Mock get node
 	fakeClient.AddReactor("get", "nodes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
@@ -596,7 +621,7 @@ func (s *TestSuite) TestUnsetDowntimeWhenUncordonFailed() {
 	fakeClient.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, fmt.Errorf("no reaction implemented for %s", action)
 	})
-	cmd := kubetool.NewConnexionFromClient(fakeClient)
+	cmd := kubetool.NewConnexionFromClient(fakeClient, dynamicFakeClient)
 
 	err := unsetDowntime(context.TODO(), cmd, "fake-node")
 	assert.Error(s.T(), err, "Uncordon failed")
@@ -608,6 +633,9 @@ func (s *TestSuite) TestUnsetDowntimeWhenNoPodsAndUncordonSuccess() {
 
 	fakeClient := fake.NewSimpleClientset()
 	fakeClient.Fake = k8stesting.Fake{}
+
+	sh := scheme.Scheme
+	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh)
 
 	// Mock get node
 	fakeClient.AddReactor("get", "nodes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
@@ -662,7 +690,7 @@ func (s *TestSuite) TestUnsetDowntimeWhenNoPodsAndUncordonSuccess() {
 	fakeClient.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, fmt.Errorf("no reaction implemented for %s", action)
 	})
-	cmd := kubetool.NewConnexionFromClient(fakeClient)
+	cmd := kubetool.NewConnexionFromClient(fakeClient, dynamicFakeClient)
 
 	err := unsetDowntime(context.TODO(), cmd, "fake-node")
 	assert.NoError(s.T(), err)
@@ -677,6 +705,9 @@ func (s *TestSuite) TestUnsetDowntimeWhenPodsAndUncordonSuccess() {
 	fakeClient.Fake = k8stesting.Fake{}
 	//fakeDiscovery := fakeClient.Discovery().(*discoveryfake.FakeDiscovery)
 	//fakeDiscovery.FakedServerVersion = FaikedVersion
+
+	sh := scheme.Scheme
+	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh)
 
 	// Mock get node
 	fakeClient.AddReactor("get", "nodes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
@@ -761,7 +792,7 @@ func (s *TestSuite) TestUnsetDowntimeWhenPodsAndUncordonSuccess() {
 	fakeClient.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, fmt.Errorf("no reaction implemented for %s", action)
 	})
-	cmd := kubetool.NewConnexionFromClient(fakeClient)
+	cmd := kubetool.NewConnexionFromClient(fakeClient, dynamicFakeClient)
 
 	err := unsetDowntime(context.TODO(), cmd, "fake-node")
 	assert.NoError(s.T(), err)
@@ -776,6 +807,9 @@ func (s *TestSuite) TestUnsetDowntimeWhenPodsAndPostjobWitSecretAndUncordonSucce
 	fakeClient.Fake = k8stesting.Fake{}
 	//fakeDiscovery := fakeClient.Discovery().(*discoveryfake.FakeDiscovery)
 	//fakeDiscovery.FakedServerVersion = FaikedVersion
+
+	sh := scheme.Scheme
+	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh)
 
 	// Mock get node
 	fakeClient.AddReactor("get", "nodes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
@@ -900,7 +934,7 @@ func (s *TestSuite) TestUnsetDowntimeWhenPodsAndPostjobWitSecretAndUncordonSucce
 	fakeClient.AddReactor("*", "*", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, fmt.Errorf("no reaction implemented for %s", action)
 	})
-	cmd := kubetool.NewConnexionFromClient(fakeClient)
+	cmd := kubetool.NewConnexionFromClient(fakeClient, dynamicFakeClient)
 
 	err := unsetDowntime(context.TODO(), cmd, "fake-node")
 	assert.NoError(s.T(), err)

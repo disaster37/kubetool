@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/disaster37/kubetool/v1.32/kubetool"
+	longhorn "github.com/longhorn/longhorn-manager/k8s/pkg/apis/longhorn/v1beta2"
 	"github.com/stretchr/testify/assert"
-	v1 "k8s.io/api/core/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	discoveryfake "k8s.io/client-go/discovery/fake"
@@ -16,7 +16,7 @@ import (
 	"k8s.io/kubectl/pkg/scheme"
 )
 
-func (s *TestSuite) TestCleanEvictedNodes() {
+func (s *TestSuite) TestcleanLonghornPendingBackup() {
 
 	fakeClient := fake.NewSimpleClientset()
 	fakeClient.Fake = k8stesting.Fake{}
@@ -24,28 +24,36 @@ func (s *TestSuite) TestCleanEvictedNodes() {
 	fakeDiscovery.FakedServerVersion = FaikedVersion
 
 	sh := scheme.Scheme
+	longhorn.AddToScheme(sh)
 	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh)
 
-	// Mock list pod
-	fakeClient.AddReactor("list", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-		pods := &v1.PodList{
-			Items: []v1.Pod{
+	// Mock list backups
+	fakeClient.AddReactor("list", "backups", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+		backups := &longhorn.BackupList{
+			Items: []longhorn.Backup{
 				{
-					Spec: v1.PodSpec{
-						NodeName: "fake-node",
-					},
 					ObjectMeta: meta.ObjectMeta{
-						Name:      "fake-pod",
-						Namespace: "fake-namespace",
+						Name: "pending-backup",
+					},
+					Status: longhorn.BackupStatus{
+						State: "Pending",
+					},
+				},
+				{
+					ObjectMeta: meta.ObjectMeta{
+						Name: "completed-backup",
+					},
+					Status: longhorn.BackupStatus{
+						State: "Completed",
 					},
 				},
 			},
 		}
-		return true, pods, nil
+		return true, backups, nil
 	})
 
-	// Mock delete pod
-	fakeClient.AddReactor("delete", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	// Mock delete backup
+	fakeClient.AddReactor("delete", "backups", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, nil, nil
 	})
 
@@ -55,6 +63,6 @@ func (s *TestSuite) TestCleanEvictedNodes() {
 	})
 	cmd := kubetool.NewConnexionFromClient(fakeClient, dynamicFakeClient)
 
-	err := cleanEvictedPods(context.Background(), cmd)
+	err := cleanLonghornPendingBackup(context.Background(), cmd)
 	assert.NoError(s.T(), err)
 }

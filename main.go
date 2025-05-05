@@ -163,6 +163,13 @@ func run(args []string) error {
 			Flags:    []cli.Flag{},
 			Action:   cmd.CleanEvictedPods,
 		},
+		{
+			Name:     "clean-longhorn-pending-backups",
+			Usage:    "Clean all Longhorn backups in pending state",
+			Category: "Clean",
+			Flags:    []cli.Flag{},
+			Action:   cmd.CleanLonghornPendingBackups,
+		},
 	}
 
 	app.Before = func(c *cli.Context) error {
