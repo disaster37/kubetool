@@ -23,6 +23,9 @@ func (k *Kubetool) HasLonghornCRD(ctx context.Context) bool {
 func (k *Kubetool) CleanPendingBackup(ctx context.Context) (err error) {
 
 	list, err := k.dclient.Resource(longhorn.SchemeGroupVersion.WithResource("backups")).Namespace("").List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return errors.Wrap(err, "Error when list Longhorn backups")
+	}
 
 	for _, backupUnstructuredObj := range list.Items {
 		// Need to convert to Backup type
