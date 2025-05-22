@@ -36,8 +36,11 @@ func SetDowntime(c *cli.Context) error {
 	if err != nil {
 		log.Error(err.Error())
 
+		// Use ctx without timeout.
+		ctx := c.Context
+
 		if kubetool.IsRescueUncordon(err) {
-			err = cmd.Uncordon(context.Background(), nodeName)
+			err = cmd.Uncordon(ctx, nodeName)
 			if err != nil {
 				// Rescue failed
 				log.Errorf("Error when try to uncordon node %s on rescue step", nodeName)
@@ -126,9 +129,7 @@ func setDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string, r
 			log.Infof("Pre script found on %s, running it...", namespace)
 
 			// Run job
-			ctxWithTimeout, cancelFun := context.WithTimeout(ctx, time.Minute*30)
-			defer cancelFun()
-			err = cmd.RunJob(ctxWithTimeout, namespace, "pre-job", jobSpec.PreJob, jobSpec.Image, jobSpec.SecretNames, nodeName)
+			err = cmd.RunJob(ctx, namespace, "pre-job", jobSpec.PreJob, jobSpec.Image, jobSpec.SecretNames, nodeName)
 			if err != nil {
 				log.Errorf("Error when run pre-job for %s", namespace)
 				return kubetool.NewRescuePostJobError(err)
@@ -212,9 +213,7 @@ func unsetDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string)
 			log.Infof("Post script found on %s, running it...", namespace)
 
 			// Run job
-			ctxWithTimeout, cancelFunc := context.WithTimeout(ctx, time.Minute*30)
-			defer cancelFunc()
-			err = cmd.RunJob(ctxWithTimeout, namespace, "post-job", jobSpec.PostJob, jobSpec.Image, jobSpec.SecretNames, nodeName)
+			err = cmd.RunJob(ctx, namespace, "post-job", jobSpec.PostJob, jobSpec.Image, jobSpec.SecretNames, nodeName)
 			if err != nil {
 				log.Errorf("Error when run post-job for %s: %s", namespace, err.Error())
 				return err
