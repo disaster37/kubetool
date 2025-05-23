@@ -46,9 +46,9 @@ func run(args []string) error {
 			Name:  "debug",
 			Usage: "Display debug output",
 		},
-		altsrc.NewInt64Flag(&cli.Int64Flag{
+		altsrc.NewDurationFlag(&cli.DurationFlag{
 			Name:  "timeout",
-			Usage: "The timeout in second",
+			Usage: "The timeout",
 			Value: 0,
 		}),
 		&cli.BoolFlag{
