@@ -22,7 +22,7 @@ func newCmd(c *cli.Context) (cmd *kubetool.Kubetool, err error) {
 
 // Permit to get context with tiemout if needed
 func getContext(c *cli.Context) (ctx context.Context, cancelFunc context.CancelFunc) {
-	if c.Int64("timeout") == 0 {
+	if c.Duration("timeout") == 0 {
 		return c.Context, nil
 	}
 
