@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"time"
 
 	"github.com/disaster37/kubetool/v1.32/kubetool"
 	log "github.com/sirupsen/logrus"
@@ -26,5 +25,5 @@ func getContext(c *cli.Context) (ctx context.Context, cancelFunc context.CancelF
 		return c.Context, nil
 	}
 
-	return context.WithTimeout(c.Context, time.Duration(c.Int64("timeout"))*time.Second)
+	return context.WithTimeout(c.Context, c.Duration("timeout"))
 }
