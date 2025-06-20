@@ -145,21 +145,22 @@ func setDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string, r
 		for currentRetry < nbRetry {
 			err = cmd.Drain(ctx, nodeName, 600*time.Second)
 			if err != nil {
-				log.Errorf("Error when drain node %s, retry in few seconds ...", nodeName)
+				log.Errorf("Error when drain node %s, retry in few seconds ...\n%s", nodeName, err.Error())
 				time.Sleep(10 * time.Second)
+				currentRetry++
 			} else {
 				break
 			}
 		}
 		if err != nil {
-			log.Errorf("Error when drain node %s", nodeName)
+			log.Errorf("Error when drain node %s\n%s", nodeName, err.Error())
 			return kubetool.NewRescuePostJobError(err)
 		}
 
 	} else {
 		err = cmd.Drain(ctx, nodeName, 600*time.Second)
 		if err != nil {
-			log.Errorf("Error when drain node %s", nodeName)
+			log.Errorf("Error when drain node %s\n%s", nodeName, err.Error())
 			return kubetool.NewRescuePostJobError(err)
 		}
 	}
