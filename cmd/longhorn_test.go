@@ -12,17 +12,22 @@ import (
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	utiljson "k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/client-go/dynamic"
 	dynamicFake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/kubectl/pkg/scheme"
 )
 
 // toUnstructured converts a typed object to an unstructured one, as the
-// dynamic client would return from a real cluster.
+// dynamic client would return from a real cluster: the JSON round-trip honors
+// the encoding/json ",string" tag option (Longhorn serializes e.g.
+// Volume.Spec.Size as a string) and preserves numbers as int64.
 func toUnstructured(t testing.TB, obj runtime.Object) runtime.Object {
 	t.Helper()
-	m, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
+	data, err := utiljson.Marshal(obj)
 	require.NoError(t, err)
+	m := map[string]interface{}{}
+	require.NoError(t, utiljson.Unmarshal(data, &m))
 	return &unstructured.Unstructured{Object: m}
 }
 
@@ -92,11 +97,15 @@ func (s *TestSuite) TestcleanLonghornOrphanBackup() {
 		toUnstructured(s.T(), backupObject("old-backup-not-older-than", "older", now)),
 		toUnstructured(s.T(), backupObject("old-backup", "older", old)),
 	}
-	for _, name := range []string{"volume1", "volume2", "volume3"} {
-		objects = append(objects, toUnstructured(s.T(), &longhorn.Volume{
+	for i, name := range []string{"volume1", "volume2", "volume3"} {
+		volume := &longhorn.Volume{
 			TypeMeta:   meta.TypeMeta{APIVersion: longhorn.SchemeGroupVersion.String(), Kind: "Volume"},
 			ObjectMeta: meta.ObjectMeta{Name: name},
-		}))
+		}
+		// Spec.Size uses the encoding/json ",string" option on the wire and
+		// must not break the unstructured to typed conversion
+		volume.Spec.Size = int64(10737418240 + i)
+		objects = append(objects, toUnstructured(s.T(), volume))
 	}
 
 	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh, objects...)

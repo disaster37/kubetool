@@ -8,8 +8,9 @@ import (
 	longhorn "github.com/longhorn/longhorn-manager/k8s/pkg/apis/longhorn/v1beta2"
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	utiljson "k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/client-go/discovery"
-	"k8s.io/kubectl/pkg/scheme"
 )
 
 // HasLonghornCRD permit to check if current cluster have loghorn CRD
@@ -22,6 +23,20 @@ func (k *Kubetool) HasLonghornCRD(ctx context.Context) bool {
 	return true
 }
 
+// convertUnstructuredToTyped converts an unstructured object to its typed form
+// through a JSON round-trip. The reflection based converter used by
+// scheme.Convert and runtime.DefaultUnstructuredConverter cannot decode fields
+// using the encoding/json ",string" option (like Longhorn's Volume.Spec.Size
+// int64 `json:"size,string"`), which fails with "unrecognized type: int64" on
+// real cluster objects. A JSON round-trip honors those tags.
+func convertUnstructuredToTyped(u runtime.Object, out interface{}) error {
+	data, err := utiljson.Marshal(u)
+	if err != nil {
+		return err
+	}
+	return utiljson.Unmarshal(data, out)
+}
+
 func (k *Kubetool) CleanPendingBackup(ctx context.Context) (err error) {
 
 	list, err := k.dclient.Resource(longhorn.SchemeGroupVersion.WithResource("backups")).Namespace("").List(ctx, metav1.ListOptions{})
@@ -29,15 +44,10 @@ func (k *Kubetool) CleanPendingBackup(ctx context.Context) (err error) {
 		return errors.Wrap(err, "Error when list Longhorn backups")
 	}
 
-	s := scheme.Scheme
-	if err := longhorn.AddToScheme(s); err != nil {
-		panic(err)
-	}
-
 	for _, backupUnstructuredObj := range list.Items {
 		// Need to convert to Backup type
 		backup := &longhorn.Backup{}
-		if err := s.Convert(&backupUnstructuredObj, backup, nil); err != nil {
+		if err := convertUnstructuredToTyped(&backupUnstructuredObj, backup); err != nil {
 			return errors.Wrap(err, "Error when convert to Longhorn Backup type")
 		}
 
@@ -63,11 +73,6 @@ func (k *Kubetool) CleanOrphanBackup(ctx context.Context, olderThan time.Duratio
 		return errors.Wrap(err, "Error when list Longhorn backups")
 	}
 
-	s := scheme.Scheme
-	if err := longhorn.AddToScheme(s); err != nil {
-		panic(err)
-	}
-
 	listVolumeUnstructured, err := k.dclient.Resource(longhorn.SchemeGroupVersion.WithResource("volumes")).Namespace("").List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return errors.Wrap(err, "Error when list Longhorn volumes")
@@ -77,7 +82,7 @@ func (k *Kubetool) CleanOrphanBackup(ctx context.Context, olderThan time.Duratio
 	existingVolumes := make(map[string]struct{}, len(listVolumeUnstructured.Items))
 	for _, volumeUnstructuredObj := range listVolumeUnstructured.Items {
 		volume := &longhorn.Volume{}
-		if err := s.Convert(&volumeUnstructuredObj, volume, nil); err != nil {
+		if err := convertUnstructuredToTyped(&volumeUnstructuredObj, volume); err != nil {
 			return errors.Wrap(err, "Error when convert to Longhorn Volume type")
 		}
 		existingVolumes[volume.Name] = struct{}{}
@@ -86,7 +91,7 @@ func (k *Kubetool) CleanOrphanBackup(ctx context.Context, olderThan time.Duratio
 	for _, backupUnstructuredObj := range listBackup.Items {
 		// Need to convert to Backup type
 		backup := &longhorn.Backup{}
-		if err := s.Convert(&backupUnstructuredObj, backup, nil); err != nil {
+		if err := convertUnstructuredToTyped(&backupUnstructuredObj, backup); err != nil {
 			return errors.Wrap(err, "Error when convert to Longhorn Backup type")
 		}
 
