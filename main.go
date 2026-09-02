@@ -170,6 +170,19 @@ func run(args []string) error {
 			Flags:    []cli.Flag{},
 			Action:   cmd.CleanLonghornPendingBackups,
 		},
+		{
+			Name:     "clean-longhorn-orphan-backups",
+			Usage:    "Clean all Longhorn backups older than --older-than whose volume does not exist anymore",
+			Category: "Clean",
+			Flags: []cli.Flag{
+				&cli.DurationFlag{
+					Name:     "older-than",
+					Usage:    "Delete orphan backups older than this duration",
+					Required: true,
+				},
+			},
+			Action: cmd.CleanLonghornOldOrphanBackup,
+		},
 	}
 
 	app.Before = func(c *cli.Context) error {

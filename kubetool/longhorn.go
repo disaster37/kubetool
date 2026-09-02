@@ -2,10 +2,11 @@ package kubetool
 
 import (
 	"context"
+	"time"
 
 	"emperror.dev/errors"
 	longhorn "github.com/longhorn/longhorn-manager/k8s/pkg/apis/longhorn/v1beta2"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/discovery"
 	"k8s.io/kubectl/pkg/scheme"
@@ -45,8 +46,74 @@ func (k *Kubetool) CleanPendingBackup(ctx context.Context) (err error) {
 			if err != nil {
 				return errors.Wrap(err, "Error when delete Longhorn backup on pending state")
 			}
-			logrus.Infof("Longhorn backup %s deleted", backup.Name)
+			log.Infof("Longhorn backup %s deleted", backup.Name)
 		}
+	}
+
+	return nil
+}
+
+// CleanOrphanBackup deletes the Longhorn backups whose volume does not exist
+// anymore and which are older than the given duration. A backup with an
+// unparsable creation date, or that cannot be deleted, is logged and skipped
+// so one bad record does not stop the whole cleanup.
+func (k *Kubetool) CleanOrphanBackup(ctx context.Context, olderThan time.Duration) (err error) {
+	listBackup, err := k.dclient.Resource(longhorn.SchemeGroupVersion.WithResource("backups")).Namespace("").List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return errors.Wrap(err, "Error when list Longhorn backups")
+	}
+
+	s := scheme.Scheme
+	if err := longhorn.AddToScheme(s); err != nil {
+		panic(err)
+	}
+
+	listVolumeUnstructured, err := k.dclient.Resource(longhorn.SchemeGroupVersion.WithResource("volumes")).Namespace("").List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return errors.Wrap(err, "Error when list Longhorn volumes")
+	}
+
+	// Keep an index of existing volume names to avoid a nested loop per backup
+	existingVolumes := make(map[string]struct{}, len(listVolumeUnstructured.Items))
+	for _, volumeUnstructuredObj := range listVolumeUnstructured.Items {
+		volume := &longhorn.Volume{}
+		if err := s.Convert(&volumeUnstructuredObj, volume, nil); err != nil {
+			return errors.Wrap(err, "Error when convert to Longhorn Volume type")
+		}
+		existingVolumes[volume.Name] = struct{}{}
+	}
+
+	for _, backupUnstructuredObj := range listBackup.Items {
+		// Need to convert to Backup type
+		backup := &longhorn.Backup{}
+		if err := s.Convert(&backupUnstructuredObj, backup, nil); err != nil {
+			return errors.Wrap(err, "Error when convert to Longhorn Backup type")
+		}
+
+		// Skip backups whose volume still exists
+		if _, isFound := existingVolumes[backup.Status.VolumeName]; isFound {
+			log.Debugf("Backup %s still has volume %s, skip", backup.Name, backup.Status.VolumeName)
+			continue
+		}
+
+		createdAt, err := time.Parse(time.RFC3339, backup.Status.BackupCreatedAt)
+		if err != nil {
+			log.Warnf("Skip orphan backup %s: could not parse creation date %q: %s", backup.Name, backup.Status.BackupCreatedAt, err.Error())
+			continue
+		}
+
+		if time.Since(createdAt) <= olderThan {
+			continue
+		}
+
+		if err := k.dclient.Resource(longhorn.SchemeGroupVersion.WithResource("backups")).
+			Namespace(backup.Namespace).
+			Delete(ctx, backup.Name, metav1.DeleteOptions{}); err != nil {
+			// Do not stop the whole cleanup on a single delete failure
+			log.Errorf("Error when delete orphan Longhorn backup %s: %s", backup.Name, err.Error())
+			continue
+		}
+		log.Infof("Orphan Longhorn backup %s deleted", backup.Name)
 	}
 
 	return nil
