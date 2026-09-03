@@ -106,6 +106,7 @@ func (k *Kubetool) CleanOrphanBackup(ctx context.Context, olderThan time.Duratio
 		}
 
 		if time.Since(createdAt) <= olderThan {
+			log.Infof("Orphan Longhorn backup %s is not yet older than %s (%s)", backup.Name, olderThan.String(), createdAt.String())
 			continue
 		}
 
