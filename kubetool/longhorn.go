@@ -117,7 +117,7 @@ func (k *Kubetool) CleanOrphanBackup(ctx context.Context, olderThan time.Duratio
 			log.Errorf("Error when delete orphan Longhorn backup %s: %s", backup.Name, err.Error())
 			continue
 		}
-		log.Infof("Orphan Longhorn backup %s deleted", backup.Name)
+		log.Infof("Orphan Longhorn backup %s deleted, %s is older than %s", backup.Name, createdAt.String(), olderThan.String())
 	}
 
 	return nil
