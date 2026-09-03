@@ -251,6 +251,7 @@ kubectl get nodes -o wide
 		WithExec(helper.ForgeScript(`
 set -e
 kubectl create namespace test
+until kubectl get serviceaccount -n test default >/dev/null 2>&1; do sleep 2; done
 kubectl run test --image=alpine --namespace test --command -- tail -f /dev/null
 kubectl apply -f /src/fixture/patchmanagement.yaml -n test
 kubectl get pods -n test
