@@ -190,5 +190,4 @@ func (k *Kubetool) NodeOk(ctx context.Context, nodeName string) (isOk bool, err 
 	}
 
 	return isOk, err
-
 }

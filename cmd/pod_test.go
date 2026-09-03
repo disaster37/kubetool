@@ -17,7 +17,6 @@ import (
 )
 
 func (s *TestSuite) TestCleanEvictedNodes() {
-
 	fakeClient := fake.NewSimpleClientset()
 	fakeClient.Fake = k8stesting.Fake{}
 	fakeDiscovery := fakeClient.Discovery().(*discoveryfake.FakeDiscovery)

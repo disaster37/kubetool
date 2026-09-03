@@ -34,12 +34,10 @@ func RunPostJob(c *cli.Context) error {
 
 	log.Infof("Post job running successfully")
 	return nil
-
 }
 
 // RunPreJob permit to run post job on given namespace
 func RunPreJob(c *cli.Context) error {
-
 	if c.String("namespace") == "" {
 		return errors.New("--namespace must be provided")
 	}
@@ -61,11 +59,9 @@ func RunPreJob(c *cli.Context) error {
 
 	log.Infof("Pre job running successfully")
 	return nil
-
 }
 
 func runPostJob(ctx context.Context, cmd *kubetool.Kubetool, namespace string) (err error) {
-
 	// Get post job
 	jobSpec, err := cmd.GetJobSpec(ctx, namespace)
 	if err != nil {
@@ -87,7 +83,6 @@ func runPostJob(ctx context.Context, cmd *kubetool.Kubetool, namespace string) (
 }
 
 func runPreJob(ctx context.Context, cmd *kubetool.Kubetool, namespace string) (err error) {
-
 	// Get pre job
 	jobSpec, err := cmd.GetJobSpec(ctx, namespace)
 	if err != nil {

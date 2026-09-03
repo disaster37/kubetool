@@ -15,7 +15,6 @@ import (
 
 // NamespacesPodsOnNode return a list of unique Namespace pod hosted on node
 func (k *Kubetool) NamespacesPodsOnNode(ctx context.Context, nodeName string) (listNamespace []string, err error) {
-
 	log.Debugf("NodeName: %s", nodeName)
 
 	listNamespace = make([]string, 0, 1)
@@ -72,12 +71,10 @@ func (k *Kubetool) WaitPodsOnNode(ctx context.Context, nodeName string) (err err
 	}
 
 	return nil
-
 }
 
 // CleanEvictedPods remove all pods failed because of Evicted
 func (k *Kubetool) CleanEvictedPods(ctx context.Context) (err error) {
-
 	pods, err := k.client.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
@@ -99,7 +96,6 @@ func (k *Kubetool) CleanEvictedPods(ctx context.Context) (err error) {
 }
 
 func (k *Kubetool) DeleteTerminatingPodsOnNode(ctx context.Context, nodeName string, maxTime time.Duration) (err error) {
-
 	// Get pods on node
 	pods, err := k.client.CoreV1().Pods("").List(ctx, metav1.ListOptions{
 		FieldSelector: "spec.nodeName=" + nodeName,

@@ -14,7 +14,6 @@ type Kubetool struct {
 
 // NewConnexion permit to connect on Kubernetes cluster from config file
 func NewConnexion(configPath string) (cmd *Kubetool, err error) {
-
 	config, err := clientcmd.BuildConfigFromFlags("", configPath)
 	if err != nil {
 		return cmd, err

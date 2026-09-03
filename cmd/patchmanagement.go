@@ -16,7 +16,6 @@ import (
 // Exit 1: Somethink wrong, we need to skip node
 // Exit 2: Somethink wrong, we need to stop patchmanagement because of node is broken
 func SetDowntime(c *cli.Context) error {
-
 	cmd, err := newCmd(c)
 	if err != nil {
 		log.Errorf("Can't connect on kubernetes: %s", err.Error())
@@ -67,7 +66,6 @@ func SetDowntime(c *cli.Context) error {
 	}
 
 	return nil
-
 }
 
 // UnsetDowntime permit to lauch some step after enable node
@@ -171,7 +169,6 @@ func setDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string, r
 }
 
 func unsetDowntime(ctx context.Context, cmd *kubetool.Kubetool, nodeName string) (err error) {
-
 	// wait node to be ready
 	for {
 		isOk, err := cmd.NodeOk(ctx, nodeName)

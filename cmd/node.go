@@ -13,7 +13,6 @@ import (
 
 // GetMasterNodes permit to list all master nodes
 func GetMasterNodes(c *cli.Context) error {
-
 	cmd, err := newCmd(c)
 	if err != nil {
 		log.Errorf("Can't connect on kubernetes: %s", err.Error())
@@ -37,7 +36,6 @@ func GetMasterNodes(c *cli.Context) error {
 
 // GetWorkerNodes permit to list all worker nodes
 func GetWorkerNodes(c *cli.Context) error {
-
 	cmd, err := newCmd(c)
 	if err != nil {
 		log.Errorf("Can't connect on kubernetes: %s", err.Error())

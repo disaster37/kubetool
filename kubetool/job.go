@@ -160,7 +160,6 @@ func (k *Kubetool) RunJob(ctx context.Context, namespace string, jobName string,
 			time.Sleep(5 * time.Second)
 		}
 	}
-
 }
 
 func (k *Kubetool) getLogs(ctx context.Context, namespace string, podName string) (ctrl logSync) {

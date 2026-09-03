@@ -22,7 +22,6 @@ import (
 // When node is not ready
 // It must return error
 func (s *TestSuite) TestSetDowntimeWhenNodeNotReady() {
-
 	fakeClient := fake.NewSimpleClientset()
 	fakeClient.Fake = k8stesting.Fake{}
 
@@ -55,7 +54,6 @@ func (s *TestSuite) TestSetDowntimeWhenNodeNotReady() {
 // When cordon node failed without retry
 // It must return error
 func (s *TestSuite) TestSetDowntimeWhenCordonFailed() {
-
 	fakeClient := fake.NewSimpleClientset()
 	fakeClient.Fake = k8stesting.Fake{}
 
@@ -84,7 +82,6 @@ func (s *TestSuite) TestSetDowntimeWhenCordonFailed() {
 
 	// Mock cordon node
 	fakeClient.AddReactor("patch", "nodes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-
 		return true, nil, fmt.Errorf("Cordon failed")
 	})
 
@@ -96,13 +93,11 @@ func (s *TestSuite) TestSetDowntimeWhenCordonFailed() {
 
 	err := setDowntime(context.TODO(), cmd, "fake-node", false, 0)
 	assert.Error(s.T(), err, "Cordon failed")
-
 }
 
 // When cordon node failed with retry
 // It must return error
 func (s *TestSuite) TestSetDowntimeWhenCordonFailedWithRetry() {
-
 	fakeClient := fake.NewSimpleClientset()
 	fakeClient.Fake = k8stesting.Fake{}
 
@@ -131,7 +126,6 @@ func (s *TestSuite) TestSetDowntimeWhenCordonFailedWithRetry() {
 
 	// Mock cordon node
 	fakeClient.AddReactor("patch", "nodes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-
 		return true, nil, fmt.Errorf("Cordon failed")
 	})
 
@@ -143,13 +137,11 @@ func (s *TestSuite) TestSetDowntimeWhenCordonFailedWithRetry() {
 
 	err := setDowntime(context.TODO(), cmd, "fake-node", true, 1)
 	assert.Error(s.T(), err, "Cordon failed")
-
 }
 
 // When node ready, no pod on node, and all success
 // It must return no error
 func (s *TestSuite) TestSetDowntimeWhenNoPodsAndDrainSuccess() {
-
 	fakeClient := fake.NewSimpleClientset()
 	fakeClient.Fake = k8stesting.Fake{}
 
@@ -217,13 +209,11 @@ func (s *TestSuite) TestSetDowntimeWhenNoPodsAndDrainSuccess() {
 
 	err := setDowntime(context.TODO(), cmd, "fake-node", false, 0)
 	assert.NoError(s.T(), err)
-
 }
 
 // When node ready, some pods on node, ans all successs
 // It must return no error
 func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainSuccess() {
-
 	fakeClient := fake.NewSimpleClientset()
 	sh := scheme.Scheme
 	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh)
@@ -298,7 +288,6 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainSuccess() {
 
 	// Mock get pod
 	fakeClient.AddReactor("get", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-
 		return true, nil, errors.NewNotFound(v1.Resource("pods"), "pod")
 	})
 
@@ -320,15 +309,14 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainSuccess() {
 
 	_ = setDowntime(context.TODO(), cmd, "fake-node", false, 0)
 	// No more working
-	//err := setDowntime(context.TODO(), cmd, "fake-node", false, 0)
-	//assert.NoError(s.T(), err)
+	// err := setDowntime(context.TODO(), cmd, "fake-node", false, 0)
+	// assert.NoError(s.T(), err)
 
 }
 
 // When node ready, some pods on node and drain failed
 // It must return error
 func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainFailed() {
-
 	fakeClient := fake.NewSimpleClientset()
 	fakeClient.Fake = k8stesting.Fake{}
 	//fakeDiscovery := fakeClient.Discovery().(*discoveryfake.FakeDiscovery)
@@ -407,9 +395,7 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainFailed() {
 
 	// Mock get pod
 	fakeClient.AddReactor("get", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-
 		return true, nil, errors.NewNotFound(v1.Resource("pods"), "pod")
-
 	})
 
 	// Mock get configmap
@@ -430,13 +416,11 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainFailed() {
 
 	err := setDowntime(context.TODO(), cmd, "fake-node", false, 0)
 	assert.Error(s.T(), err, "Failed to delete pod")
-
 }
 
 // When node reay, some pods on node, pre job found and all success
 // It must return no error
 func (s *TestSuite) TestSetDowntimeWhenPodsAndPrejobWitSecretAndDrainSuccess() {
-
 	fakeClient := fake.NewSimpleClientset()
 	fakeClient.Fake = k8stesting.Fake{}
 	//fakeDiscovery := fakeClient.Discovery().(*discoveryfake.FakeDiscovery)
@@ -506,13 +490,11 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndPrejobWitSecretAndDrainSuccess() {
 
 	// Mock get pod
 	fakeClient.AddReactor("get", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-
 		return true, nil, errors.NewNotFound(v1.Resource("pods"), "pod")
 	})
 
 	// Mock get configmap
 	fakeClient.AddReactor("get", "configmaps", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-
 		configmap := &v1.ConfigMap{
 			ObjectMeta: meta.ObjectMeta{
 				Name:      "patchmanagement",
@@ -559,7 +541,6 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndPrejobWitSecretAndDrainSuccess() {
 
 			return true, job, nil
 		}
-
 	})
 
 	// Mock create job
@@ -576,15 +557,14 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndPrejobWitSecretAndDrainSuccess() {
 	cmd := kubetool.NewConnexionFromClient(fakeClient, dynamicFakeClient)
 
 	_ = setDowntime(context.TODO(), cmd, "fake-node", false, 0)
-	//no more working
-	//err := setDowntime(context.TODO(), cmd, "fake-node", false, 0)
-	//assert.NoError(s.T(), err)
+	// no more working
+	// err := setDowntime(context.TODO(), cmd, "fake-node", false, 0)
+	// assert.NoError(s.T(), err)
 }
 
 // When uncordon node failed
 // It must return error
 func (s *TestSuite) TestUnsetDowntimeWhenUncordonFailed() {
-
 	fakeClient := fake.NewSimpleClientset()
 	fakeClient.Fake = k8stesting.Fake{}
 
@@ -613,7 +593,6 @@ func (s *TestSuite) TestUnsetDowntimeWhenUncordonFailed() {
 
 	// Mock cordon node
 	fakeClient.AddReactor("patch", "nodes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-
 		return true, nil, fmt.Errorf("Uncordon failed")
 	})
 
@@ -630,7 +609,6 @@ func (s *TestSuite) TestUnsetDowntimeWhenUncordonFailed() {
 // When node ready, no pod on node, and all success
 // It must return no error
 func (s *TestSuite) TestUnsetDowntimeWhenNoPodsAndUncordonSuccess() {
-
 	fakeClient := fake.NewSimpleClientset()
 	fakeClient.Fake = k8stesting.Fake{}
 
@@ -694,13 +672,11 @@ func (s *TestSuite) TestUnsetDowntimeWhenNoPodsAndUncordonSuccess() {
 
 	err := unsetDowntime(context.TODO(), cmd, "fake-node")
 	assert.NoError(s.T(), err)
-
 }
 
 // When node ready, some pods on node, and all successs
 // It must return no error
 func (s *TestSuite) TestUnsetDowntimeWhenPodsAndUncordonSuccess() {
-
 	fakeClient := fake.NewSimpleClientset()
 	fakeClient.Fake = k8stesting.Fake{}
 	//fakeDiscovery := fakeClient.Discovery().(*discoveryfake.FakeDiscovery)
@@ -779,7 +755,6 @@ func (s *TestSuite) TestUnsetDowntimeWhenPodsAndUncordonSuccess() {
 
 	// Mock get pod
 	fakeClient.AddReactor("get", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-
 		return true, nil, errors.NewNotFound(v1.Resource("pods"), "pod")
 	})
 
@@ -796,13 +771,11 @@ func (s *TestSuite) TestUnsetDowntimeWhenPodsAndUncordonSuccess() {
 
 	err := unsetDowntime(context.TODO(), cmd, "fake-node")
 	assert.NoError(s.T(), err)
-
 }
 
 // When node ready, some pods on node, post job found and all success
 // It must return no error
 func (s *TestSuite) TestUnsetDowntimeWhenPodsAndPostjobWitSecretAndUncordonSuccess() {
-
 	fakeClient := fake.NewSimpleClientset()
 	fakeClient.Fake = k8stesting.Fake{}
 	//fakeDiscovery := fakeClient.Discovery().(*discoveryfake.FakeDiscovery)
@@ -872,13 +845,11 @@ func (s *TestSuite) TestUnsetDowntimeWhenPodsAndPostjobWitSecretAndUncordonSucce
 
 	// Mock get pod
 	fakeClient.AddReactor("get", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-
 		return true, nil, errors.NewNotFound(v1.Resource("pods"), "pod")
 	})
 
 	// Mock get configmap
 	fakeClient.AddReactor("get", "configmaps", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-
 		configmap := &v1.ConfigMap{
 			ObjectMeta: meta.ObjectMeta{
 				Name:      "patchmanagement",
@@ -920,7 +891,6 @@ func (s *TestSuite) TestUnsetDowntimeWhenPodsAndPostjobWitSecretAndUncordonSucce
 
 			return true, job, nil
 		}
-
 	})
 
 	// Mock create job

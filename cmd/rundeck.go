@@ -22,7 +22,6 @@ type RundeckNodeEntry struct {
 
 // GetNodesForRundeck permit to list all nodes and return Rundeck node entry format
 func GetNodesForRundeck(c *cli.Context) error {
-
 	cmd, err := newCmd(c)
 	if err != nil {
 		log.Errorf("Can't connect on kubernetes: %s", err.Error())

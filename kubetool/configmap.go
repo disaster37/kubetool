@@ -14,7 +14,6 @@ func (k *Kubetool) GetJobSpec(ctx context.Context, namespace string) (job *Job, 
 	log.Debugf("Namespace: %s", namespace)
 
 	configMap, err := k.client.CoreV1().ConfigMaps(namespace).Get(ctx, "patchmanagement", metav1.GetOptions{})
-
 	if err != nil {
 		if errors.IsNotFound(err) {
 			log.Debugf("No pre-job found on %s", namespace)

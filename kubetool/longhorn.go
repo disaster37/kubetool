@@ -15,7 +15,6 @@ import (
 
 // HasLonghornCRD permit to check if current cluster have loghorn CRD
 func (k *Kubetool) HasLonghornCRD(ctx context.Context) bool {
-
 	if err := discovery.ServerSupportsVersion(k.client.Discovery(), longhorn.SchemeGroupVersion); err != nil {
 		return false
 	}
@@ -38,7 +37,6 @@ func convertUnstructuredToTyped(u runtime.Object, out interface{}) error {
 }
 
 func (k *Kubetool) CleanPendingBackup(ctx context.Context) (err error) {
-
 	list, err := k.dclient.Resource(longhorn.SchemeGroupVersion.WithResource("backups")).Namespace("").List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return errors.Wrap(err, "Error when list Longhorn backups")

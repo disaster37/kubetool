@@ -18,10 +18,8 @@ type TestSuite struct {
 }
 
 func (s *TestSuite) SetupSuite() {
-
 	// Init logger
 	logrus.SetLevel(logrus.DebugLevel)
-
 }
 
 func TestTestSuite(t *testing.T) {

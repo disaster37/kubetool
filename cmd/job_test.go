@@ -19,7 +19,6 @@ import (
 )
 
 func (s *TestSuite) TestRunPreJob() {
-
 	fakeClient := fake.NewSimpleClientset()
 	fakeClient.Fake = k8stesting.Fake{}
 	fakeDiscovery := fakeClient.Discovery().(*discoveryfake.FakeDiscovery)
@@ -48,13 +47,11 @@ func (s *TestSuite) TestRunPreJob() {
 
 	// Mock get pod
 	fakeClient.AddReactor("get", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-
 		return true, nil, errors.NewNotFound(v1.Resource("pods"), "pod")
 	})
 
 	// Mock get configmap
 	fakeClient.AddReactor("get", "configmaps", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-
 		configmap := &v1.ConfigMap{
 			ObjectMeta: meta.ObjectMeta{
 				Name:      "patchmanagement",
@@ -101,7 +98,6 @@ func (s *TestSuite) TestRunPreJob() {
 
 			return true, job, nil
 		}
-
 	})
 
 	// Mock create job
@@ -122,7 +118,6 @@ func (s *TestSuite) TestRunPreJob() {
 }
 
 func (s *TestSuite) TestRunPostJob() {
-
 	fakeClient := fake.NewSimpleClientset()
 	fakeClient.Fake = k8stesting.Fake{}
 	fakeDiscovery := fakeClient.Discovery().(*discoveryfake.FakeDiscovery)
@@ -151,13 +146,11 @@ func (s *TestSuite) TestRunPostJob() {
 
 	// Mock get pod
 	fakeClient.AddReactor("get", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-
 		return true, nil, errors.NewNotFound(v1.Resource("pods"), "pod")
 	})
 
 	// Mock get configmap
 	fakeClient.AddReactor("get", "configmaps", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-
 		configmap := &v1.ConfigMap{
 			ObjectMeta: meta.ObjectMeta{
 				Name:      "patchmanagement",
@@ -204,7 +197,6 @@ func (s *TestSuite) TestRunPostJob() {
 
 			return true, job, nil
 		}
-
 	})
 
 	// Mock create job

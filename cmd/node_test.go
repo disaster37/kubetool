@@ -13,7 +13,6 @@ import (
 )
 
 func (s *TestSuite) TestGetWorkerNodes() {
-
 	sh := scheme.Scheme
 	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh)
 
@@ -44,7 +43,6 @@ func (s *TestSuite) TestGetWorkerNodes() {
 }
 
 func (s *TestSuite) TestGetMasterNodes() {
-
 	sh := scheme.Scheme
 	dynamicFakeClient := dynamicFake.NewSimpleDynamicClient(sh)
 
@@ -72,5 +70,4 @@ func (s *TestSuite) TestGetMasterNodes() {
 	nodes, err := getMasterNodes(context.TODO(), cmd)
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), "master1", nodes[0])
-
 }

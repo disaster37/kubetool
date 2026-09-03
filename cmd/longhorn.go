@@ -15,7 +15,6 @@ import (
 // It retrieves the necessary context and command tool, checks for connection
 // errors, and calls the internal function to perform the cleanup.
 func CleanLonghornPendingBackups(c *cli.Context) error {
-
 	cmd, err := newCmd(c)
 	if err != nil {
 		log.Errorf("Can't connect on kubernetes: %s", err.Error())

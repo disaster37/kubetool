@@ -10,13 +10,11 @@ import (
 
 // Permit to get connexion on kubernetes
 func newCmd(c *cli.Context) (cmd *kubetool.Kubetool, err error) {
-
 	log.Debugf("Use kubeconfig: %s", c.String("kubeconfig"))
 
 	cmd, err = kubetool.NewConnexion(c.String("kubeconfig"))
 
 	return cmd, err
-
 }
 
 // Permit to get context with tiemout if needed

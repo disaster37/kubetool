@@ -32,7 +32,6 @@ func CleanEvictedPods(c *cli.Context) error {
 }
 
 func cleanEvictedPods(ctx context.Context, cmd *kubetool.Kubetool) (err error) {
-
 	// Get post job
 	err = cmd.CleanEvictedPods(ctx)
 	if err != nil {
