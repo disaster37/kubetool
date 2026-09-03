@@ -37,4 +37,4 @@ jobs:
           REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
           IS_TAG: ${{ github.ref_type == 'tag' && '--is-tag' || '' }}
           IS_PR: ${{ github.event_name == 'pull_request' && format('--pr-number={0}', github.event.pull_request.number) || '' }}
-          BRANCH_NAME: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref_type == 'tag' && 'main' || github.ref_name }}
+          BRANCH_NAME: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref_type == 'tag' && 'v1.32' || github.ref_name }}

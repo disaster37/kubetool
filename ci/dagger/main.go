@@ -21,7 +21,7 @@ import (
 const (
 	gitUsername      string = "ci"
 	gitEmail         string = "ci@localhost"
-	defaultGitBranch string = "main"
+	defaultGitBranch string = "v1.32"
 	registry         string = "ghcr.io"
 	repository       string = "disaster37/kubetool"
 	devTag           string = "dev"
