@@ -4,6 +4,10 @@ fmt:
 	@echo "==> Fixing source code with gofmt..."
 	gofmt -s -w ./
 
+lint:
+	@echo "==> Linting source code with golangci-lint..."
+	golangci-lint run --timeout 5m
+
 test: fmt
 	go test ./... -v -count 1 -parallel 1 -race -coverprofile=coverage.txt -covermode=atomic $(TESTARGS) -timeout 180s
 

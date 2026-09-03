@@ -1,6 +1,6 @@
 module github.com/disaster37/kubetool/v1.32
 
-go 1.24.0
+go 1.26.0
 
 require (
 	emperror.dev/errors v0.8.1
