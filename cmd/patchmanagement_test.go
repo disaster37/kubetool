@@ -311,7 +311,6 @@ func (s *TestSuite) TestSetDowntimeWhenPodsAndDrainSuccess() {
 	// No more working
 	// err := setDowntime(context.TODO(), cmd, "fake-node", false, 0)
 	// assert.NoError(s.T(), err)
-
 }
 
 // When node ready, some pods on node and drain failed
